@@ -1,2 +1,2 @@
 # SigNill
-Knock off signal/Secure messing application written in Python 3
+Knock off signal/Secure messaging application written in Python 3
