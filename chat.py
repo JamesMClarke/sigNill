@@ -3,7 +3,7 @@ import threading
 import sys
 
 
-#TODO add threading,
+#TODO add threading, to allow for multiple clients
 #TODO convert to p2p
 #TODO start each message with username
 
@@ -49,16 +49,20 @@ class Client:
         tcp_ip = '127.0.0.1'
         buff_size = 1024
 
-        mesg = 'hello bob'
 
         tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tcp_sock.connect((tcp_ip,tcp_port))
+
+        mesg = input()
+
 
         tcp_sock.send(mesg.encode('utf-8'))
 
         data = tcp_sock.recv(buff_size)
         print(data)
 
+        #closes socket
+        
         tcp_sock.close()
 
 
