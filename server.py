@@ -43,6 +43,13 @@ class Server:
 
                 break
             print("recieved data", data)
+    
+    def menu(self):
+        i = input("Input")
+        print(i)
+        if(i == "exit"):
+            self.tcp_sock.close()
+            quit()
 
     def run(self):
         while True:
@@ -52,6 +59,11 @@ class Server:
             connect_thread.daemon =True
             connect_thread.start()
             
+            menu_thread = threading.Thread(target=self.menu)
+            menu_thread.daemon = True
+            menu_thread.start()
+            
+
             self.connections.append(c)
             print(str(a[0])+":"+str(a[1]),"connected")
 
