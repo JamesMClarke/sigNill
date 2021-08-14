@@ -7,7 +7,6 @@ import sys
 #TODO start each message with username
 #TODO if ip address is already in used use another
 #TODO add error handling if client dc's from server
-#TODO replace 
 
 class Server:
 
@@ -24,6 +23,7 @@ class Server:
         self.buf_size = 30
         self.tcp_sock.bind((tcp_ip,tcp_port))
         self.tcp_sock.listen(1)
+        print('server running')
         
         self.con, addr = self.tcp_sock.accept()
         print("connection address is :", addr)
@@ -41,7 +41,7 @@ class Server:
                 print("disconnected")
                 break
             print("recieved data", data)
-            self.con.send(data)
+            c.send(data)
 
     def run(self):
         while True:
@@ -86,21 +86,22 @@ class Client:
 
 
     def send_mesg(self):
-        self.username = 'test'
+      
 
         while True:
             
 
-            mesg = self.username+input()
+            mesg = input()
             self.tcp_sock.send(mesg.encode('utf-8'))
             if(mesg =='exit'):
                 self.tcp_sock.close()
+                exit()
 
         
 
 
 
-if (len(sys.argv)>=1):
+if (len(sys.argv)>1):
     client = Client()
 else:
     server = Server()
