@@ -6,9 +6,8 @@ import sys
 #TODO convert to p2p
 #TODO start each message with username
 #TODO if port is already in used use another
-#TODO add error handling if client dc's from server
-#TODO BUG: investigate second client having to restart to send messages
-
+#TODO add encypt message
+#TODO rename file to signill, allow args for server and client mode
 class Server:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,7 +36,7 @@ class Server:
                 connection.send(data)
 
             if not data:
-                #to do get user name 
+                #displays disconnected client
                 print(str(a[0])+ str(a[1]),"disconnected")
                 self.connections.remove(c)
                 c.close()
