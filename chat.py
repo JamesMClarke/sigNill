@@ -5,17 +5,18 @@ import sys
 
 #TODO convert to p2p
 #TODO start each message with username
-#TODO if ip address is already in used use another
+#TODO if port is already in used use another
 #TODO add error handling if client dc's from server
+#TODO BUG: investigate second client having to restart to send messages
 
 class Server:
 
+    tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connections = []
 
     def __init__(self):
         
         #creates TCP socket, assigns ip,port
-        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
 
@@ -25,8 +26,7 @@ class Server:
         self.tcp_sock.listen(1)
         print('server running')
         
-        self.con, addr = self.tcp_sock.accept()
-        print("connection address is :", addr)
+        #self.con, addr = self.tcp_sock.accept()
 
     def handler(self,c,a):
 
@@ -38,10 +38,12 @@ class Server:
 
             if not data:
                 #to do get user name 
-                print("disconnected")
+                print(str(a[0])+ str(a[1]),"disconnected")
+                self.connections.remove(c)
+                c.close()
+
                 break
             print("recieved data", data)
-            c.send(data)
 
     def run(self):
         while True:
@@ -52,12 +54,15 @@ class Server:
             connect_thread.start()
             
             self.connections.append(c)
+            print(str(a[0])+":"+str(a[1]),"connected")
 
 
 
 
 
 class Client:
+    tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
     def __init__(self):
         tcp_port = 8080
@@ -65,7 +70,6 @@ class Client:
         buff_size = 1024
 
 
-        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_sock.connect((tcp_ip,tcp_port))
         
 
@@ -78,22 +82,19 @@ class Client:
             print(data)
             if not data:
                 break
+            print(str(data,'utf-8'))
 
-        data = self.tcp_sock.recv(buff_size)
-        print(data)
 
         
 
 
     def send_mesg(self):
       
-
         while True:
             
-
             mesg = input()
-            self.tcp_sock.send(mesg.encode('utf-8'))
-            if(mesg =='exit'):
+            self.tcp_sock.send(bytes(mesg,'utf-8'))
+            if( mesg =='exit'):
                 self.tcp_sock.close()
                 exit()
 
