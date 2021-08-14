@@ -44,6 +44,21 @@ class key:
     def get_shared(self):
         return self._shared
 
+    def encrypt(self, text):
+        text = bytes(text,'utf-8')
+        encrypted = int.from_bytes(text, "big") * self._shared
+        #TODO: Work out the length correctly
+        encrypted = int.to_bytes(encrypted,byteorder="big",length=(1024))
+        return encrypted
+    
+    def decrypt(self, message):
+        num = int.from_bytes(message, "big")
+        num = num // self._shared
+        #TODO: Fix length here as well 
+        num = int.to_bytes(num,byteorder="big",length=(1024))
+        text = str(num)
+        return text
+
 Alice = key()
 P = Alice.get_P()
 G = Alice.get_G()
@@ -57,4 +72,6 @@ Alice.generate_shared(Bob_public)
 Bob.generate_shared(Alice_Public)
 print(Alice.get_shared())
 print(Bob.get_shared())
+message = Alice.encrypt("test")
+print(Bob.decrypt(message))
 
