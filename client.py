@@ -1,6 +1,8 @@
+from json import decoder
 import socket
 import threading
 import sys
+import json as js
 
 class Client:
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -20,12 +22,25 @@ class Client:
         input_thread.start()
 
         while True:
+            
             data = self.tcp_sock.recv(buff_size)
+            data = str(data,'utf-8')
             print(data)
+            data = js.loads(data)
+
+            if 'status' in data:
+                print("found status",data['status'])
+
+        
+            #data = js.loads(data)
+            #print(data['status'])
+           
+            
+            
             if not data:
                 print('cannot connect to server')
                 break
-            print(str(data,'utf-8'))
+            #print(str(data,'utf-8'))
 
 
         

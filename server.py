@@ -1,3 +1,4 @@
+import json as js
 import socket
 import threading
 import sys
@@ -6,6 +7,8 @@ import sys
 #TODO start each message with username
 #TODO if port is already in used use another
 #TODO add encypt message
+#TODO add kick client option
+
 class Server:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,14 +41,13 @@ class Server:
                 c.close()
 
                 break
-            #print(str(data,'utf-8'))
     
     def menu(self):
+        
         i = input("Input: ")
         match i:
-        
-            case("exit"):
 
+            case("exit"):
                 self.tcp_sock.close()
                 print("server closed")
                 sys.exit()
@@ -53,8 +55,6 @@ class Server:
             case("list-clients"):
                 for connection in self.connections:
                     print(connection)
-
-
 
     def run(self):
 
@@ -81,8 +81,9 @@ class Server:
             
             self.connections.append(c)
             #sends status connected signal 
-            status_ok = {"status":"client connected"}
-            c.send(bytes(str(status_ok),'utf-8'))
+            data = '{"status":"client connected"}'
+
+            c.send(bytes(data,encoding ='utf-8'))
 
             print("\n",str(a[0])+":"+str(a[1]),"connected")
 
