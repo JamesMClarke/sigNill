@@ -8,6 +8,7 @@ import sys
 #TODO if port is already in used use another
 #TODO add encypt message
 #TODO add kick client option
+#TODO add if stmnts for when server conn is lost or down
 
 class Server:
 
@@ -82,7 +83,10 @@ class Server:
             self.connections.append(c)
             #sends status ok
 
+            #test json status data
             data = '{"status":"ok"}'
+            #data = '{"status":"fail"}'
+
 
             c.send(bytes(data,encoding ='utf-8'))
 

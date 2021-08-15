@@ -30,10 +30,13 @@ class Client:
                     input_thread = threading.Thread(target=self.send_mesg)
                     input_thread.daemon = True
                     input_thread.start()
+                    
+                elif(data["status"] =='fail'):
+                    print("cannot connect to server")
+                    sys.exit()
 
             if("msg" in data):
-                if (data['msg'] == True):
-                    print("message",data['msg'])
+                print("message",data['msg'])
 
         
             #data = js.loads(data)
