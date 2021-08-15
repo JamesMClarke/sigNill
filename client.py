@@ -4,71 +4,67 @@ import threading
 import sys
 import json as js
 
-class Client:
-    tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#TODO redo threading and application func flow
+def main():
+    
+    client = Client()
+    client.connect_to_server()
 
+
+class Client:
 
     def __init__(self):
-        tcp_port = 8080
-        tcp_ip = '127.0.0.1'
-        buff_size = 1024
-        alive = True
+
+        self.tcp_port = 8080
+        self.tcp_ip = '127.0.0.1'
+        self.buff_size = 1024
+        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-        self.tcp_sock.connect((tcp_ip,tcp_port))
-        
+    def connect_to_server(self):
 
-        while alive:
+        self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             
-            data = self.tcp_sock.recv(buff_size)
+        while True:    
+            data = self.tcp_sock.recv(self.buff_size)
             data = str(data,'utf-8')
             print(data)
             data = js.loads(data)
-
             if ("status" in data):
                 if (data['status'] == 'ok'):
                     print("connected to server")
-                    input_thread = threading.Thread(target=self.send_mesg)
-                    input_thread.daemon = True
-                    input_thread.start()
-                    
+                    self.input_thread = threading.Thread(target=self.send_mesg)                        
+                    self.input_thread.daemon = True
+                    self.input_thread.start()
+
                 elif(data["status"] =='fail'):
                     print("cannot connect to server")
                     sys.exit()
 
-            if("msg" in data):
-                print("message",data['msg'])
-
-        
-            #data = js.loads(data)
-            #print(data['status'])
-           
-            
-            
+            if("msg" in data):                    
+                print("message",data['msg'])    
+                
             if not data:
                 print('cannot connect to server')
                 break
-            #print(str(data,'utf-8'))
-
-
-        
-
+                #print(str(data,'utf-8'))
 
     def send_mesg(self):
       
         while True:
             
-            mesg = input()
+            mesg = input("type message:  ")
+            print(mesg)
             
-            if( mesg =="exit"):
+            if (str(mesg) == "exit"):
                 self.tcp_sock.close()
-                self.alive = False
-                exit()
+                sys.exit(0)
+
             json_mesg = {"mesg":mesg}
             #converts to json
             json_mesg = js.dumps(json_mesg)
             self.tcp_sock.send(bytes(json_mesg,encoding='utf-8'))
 
-
-            
-client = Client()
+           
+if __name__ == "__main__":
+    main()
