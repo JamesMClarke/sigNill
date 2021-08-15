@@ -3,11 +3,9 @@ import threading
 import sys
 
 
-#TODO convert to p2p
 #TODO start each message with username
 #TODO if port is already in used use another
 #TODO add encypt message
-#TODO rename file to signill, allow args for server and client mode
 class Server:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,17 +13,13 @@ class Server:
 
     def __init__(self):
 
-
+        
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
         run_thread.start()
-
+        
         self.menu()
-  
-
-        
-      
-        
+    
         #self.con, addr = self.tcp_sock.accept()
 
     def handler(self,c,a):
@@ -48,16 +42,22 @@ class Server:
     
     def menu(self):
         i = input("Input: ")
-        #print(i)
         match i:
         
             case("exit"):
 
                 self.tcp_sock.close()
+                print("server closed")
                 sys.exit()
+
+            case("list-clients"):
+                for connection in self.connections:
+                    print(connection)
+
 
 
     def run(self):
+
         
         #creates TCP socket, assigns ip,port
         tcp_ip = '127.0.0.1'
@@ -67,7 +67,8 @@ class Server:
         self.buf_size = 30
         self.tcp_sock.bind((tcp_ip,tcp_port))
         self.tcp_sock.listen(1)
-        print('server running')
+        print('server running\n')
+
 
 
         while True:
