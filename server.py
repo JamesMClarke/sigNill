@@ -9,6 +9,7 @@ import sys
 #TODO add encypt message
 #TODO add kick client option
 #TODO add if stmnts for when server conn is lost or down
+#TODO first status, secret data, then allow messaging
 
 class Server:
 
