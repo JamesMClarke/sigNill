@@ -4,7 +4,7 @@ import threading
 import sys
 import json as js
 
-
+#TODO redo threading and application func flow
 def main():
     
     client = Client()
@@ -43,9 +43,9 @@ class Client:
             if ("status" in data):
                 if (data['status'] == 'ok'):
                     print("connected to server")
-                    input_thread = threading.Thread(target=self.send_mesg)
-                    input_thread.daemon = True
-                    input_thread.start()
+                    self.input_thread = threading.Thread(target=self.send_mesg)
+                    self.input_thread.daemon = True
+                    self.input_thread.start()
 
                 elif(data["status"] =='fail'):
                     print("cannot connect to server")
@@ -67,16 +67,22 @@ class Client:
       
         while True:
             
-            mesg = input()
+            mesg = input("type message:  ")
+            print(mesg)
+            if (str(mesg) == "exit"):
+
+                self.tcp_sock.close()
+                sys.exit(0)
+
+
+
+             
             json_mesg = {"mesg":mesg}
             #converts to json
             json_mesg = js.dumps(json_mesg)
             self.tcp_sock.send(bytes(json_mesg,encoding='utf-8'))
 
 
-            if( mesg =='exit'):
-                self.tcp_sock.close()
-                exit()
-
+           
 if __name__ == "__main__":
     main()

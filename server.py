@@ -48,7 +48,7 @@ class Server:
         
         i = input("Input: ")
         match i:
-
+            
             case("exit"):
                 self.tcp_sock.close()
                 print("server closed")
@@ -59,6 +59,11 @@ class Server:
                     print(connection)
                 if(len(self.connections) == 0):
                     print("no connections")
+
+
+            case("help"):
+                print("Available Commands:\nlist-clients\nexit\nhelp")
+              
                     
 
             case(__):
