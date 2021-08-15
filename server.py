@@ -57,6 +57,14 @@ class Server:
             case("list-clients"):
                 for connection in self.connections:
                     print(connection)
+                if(len(self.connections) == 0):
+                    print("no connections")
+                    
+
+            case(__):
+                print("not valid command")
+        self.menu()
+
 
     def run(self):
 
