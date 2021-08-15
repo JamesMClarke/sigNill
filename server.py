@@ -80,8 +80,9 @@ class Server:
 
             
             self.connections.append(c)
-            #sends status connected signal 
-            data = '{"status":"client connected"}'
+            #sends status ok
+
+            data = '{"status":"ok"}'
 
             c.send(bytes(data,encoding ='utf-8'))
 

@@ -17,10 +17,6 @@ class Client:
         self.tcp_sock.connect((tcp_ip,tcp_port))
         
 
-        input_thread = threading.Thread(target=self.send_mesg)
-        input_thread.daemon = True
-        input_thread.start()
-
         while True:
             
             data = self.tcp_sock.recv(buff_size)
@@ -28,8 +24,16 @@ class Client:
             print(data)
             data = js.loads(data)
 
-            if 'status' in data:
-                print("found status",data['status'])
+            if ("status" in data):
+                if (data['status'] == 'ok'):
+                    print("connected to server")
+                    input_thread = threading.Thread(target=self.send_mesg)
+                    input_thread.daemon = True
+                    input_thread.start()
+
+            if("msg" in data):
+                if (data['msg'] == True):
+                    print("message",data['msg'])
 
         
             #data = js.loads(data)
@@ -51,7 +55,12 @@ class Client:
         while True:
             
             mesg = input()
-            self.tcp_sock.send(bytes(mesg,'utf-8'))
+            json_mesg = {"mesg":mesg}
+            #converts to json
+            json_mesg = js.dumps(json_mesg)
+            self.tcp_sock.send(bytes(json_mesg,encoding='utf-8'))
+
+
             if( mesg =='exit'):
                 self.tcp_sock.close()
                 exit()
