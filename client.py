@@ -29,39 +29,34 @@ class Client:
 
     def connect_to_server(self):
 
-
         self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
-        
-
-        while True:
             
+        while True:    
             data = self.tcp_sock.recv(self.buff_size)
             data = str(data,'utf-8')
             print(data)
             data = js.loads(data)
-
             if ("status" in data):
                 if (data['status'] == 'ok'):
                     print("connected to server")
-                    self.input_thread = threading.Thread(target=self.send_mesg)
+                    self.input_thread = threading.Thread(target=self.send_mesg)                        
                     self.input_thread.daemon = True
                     self.input_thread.start()
 
                 elif(data["status"] =='fail'):
                     print("cannot connect to server")
-                    
-                    #sys.exit()
+                    sys.exit()
 
-            if("msg" in data):
-                print("message",data['msg'])
-
-        
-            
-            
+            if("msg" in data):                    
+                print("message",data['msg'])    
+                
+                
             if not data:
                 print('cannot connect to server')
                 break
-            #print(str(data,'utf-8'))
+                #print(str(data,'utf-8'))
+
+      
 
     def send_mesg(self):
       
