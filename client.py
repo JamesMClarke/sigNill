@@ -4,22 +4,38 @@ import threading
 import sys
 import json as js
 
+
+def main():
+    
+    client = Client()
+    client.connect_to_server()
+
+
 class Client:
-    tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
     def __init__(self):
-        tcp_port = 8080
-        tcp_ip = '127.0.0.1'
-        buff_size = 1024
+
+        self.tcp_port = 8080
+        self.tcp_ip = '127.0.0.1'
+        self.buff_size = 1024
+        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-        self.tcp_sock.connect((tcp_ip,tcp_port))
+
+
+
+
+
+    def connect_to_server(self):
+
+
+        self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
         
 
         while True:
             
-            data = self.tcp_sock.recv(buff_size)
+            data = self.tcp_sock.recv(self.buff_size)
             data = str(data,'utf-8')
             print(data)
             data = js.loads(data)
@@ -30,28 +46,22 @@ class Client:
                     input_thread = threading.Thread(target=self.send_mesg)
                     input_thread.daemon = True
                     input_thread.start()
-                    
+
                 elif(data["status"] =='fail'):
                     print("cannot connect to server")
-                    sys.exit()
+                    
+                    #sys.exit()
 
             if("msg" in data):
                 print("message",data['msg'])
 
         
-            #data = js.loads(data)
-            #print(data['status'])
-           
             
             
             if not data:
                 print('cannot connect to server')
                 break
             #print(str(data,'utf-8'))
-
-
-        
-
 
     def send_mesg(self):
       
@@ -67,4 +77,6 @@ class Client:
             if( mesg =='exit'):
                 self.tcp_sock.close()
                 exit()
-client = Client()
+
+if __name__ == "__main__":
+    main()
