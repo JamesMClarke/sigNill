@@ -14,16 +14,17 @@ class Server:
     connections = []
 
     def __init__(self):
-        
-        #creates TCP socket, assigns ip,port
-        tcp_ip = '127.0.0.1'
-        tcp_port = 8080
 
-        #recieving data bugger
-        self.buf_size = 30
-        self.tcp_sock.bind((tcp_ip,tcp_port))
-        self.tcp_sock.listen(1)
-        print('server running')
+
+        run_thread = threading.Thread(target=self.run)
+        run_thread.daemon = True
+        run_thread.start()
+
+        self.menu()
+  
+
+        
+      
         
         #self.con, addr = self.tcp_sock.accept()
 
@@ -35,6 +36,7 @@ class Server:
             for connection in self.connections: 
                 connection.send(data)
 
+
             if not data:
                 #displays disconnected client
                 print(str(a[0])+ str(a[1]),"disconnected")
@@ -42,30 +44,46 @@ class Server:
                 c.close()
 
                 break
-            print("recieved data", data)
+            #print(str(data,'utf-8'))
     
     def menu(self):
-        i = input("Input")
-        print(i)
-        if(i == "exit"):
-            self.tcp_sock.close()
-            quit()
+        i = input("Input: ")
+        #print(i)
+        match i:
+        
+            case("exit"):
+
+                self.tcp_sock.close()
+                sys.exit()
+
 
     def run(self):
+        
+        #creates TCP socket, assigns ip,port
+        tcp_ip = '127.0.0.1'
+        tcp_port = 8080
+
+        #recieving data bugger
+        self.buf_size = 30
+        self.tcp_sock.bind((tcp_ip,tcp_port))
+        self.tcp_sock.listen(1)
+        print('server running')
+
+
         while True:
             
             c,a = self.tcp_sock.accept()
             connect_thread = threading.Thread(target=self.handler,args = (c,a))
             connect_thread.daemon =True
-            connect_thread.start()
-            
-            menu_thread = threading.Thread(target=self.menu)
-            menu_thread.daemon = True
-            menu_thread.start()
-            
+            connect_thread.start() 
 
+            
             self.connections.append(c)
-            print(str(a[0])+":"+str(a[1]),"connected")
+            #sends status connected signal 
+            status_ok = {"status":"client connected"}
+            c.send(bytes(str(status_ok),'utf-8'))
+
+            print("\n",str(a[0])+":"+str(a[1]),"connected")
 
 
         
@@ -74,7 +92,6 @@ class Server:
 
 
 server = Server()
-server.run()
 
 
 
