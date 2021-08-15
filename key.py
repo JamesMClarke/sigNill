@@ -1,8 +1,10 @@
 import os
+import codecs
 from Crypto.Util import number
+from time import time
 
 class key:
-    _key_bits = 4096
+    _key_bits = 1024
     _P: int
     _G: int
     _private: int
@@ -45,33 +47,38 @@ class key:
         return self._shared
 
     def encrypt(self, text):
-        text = bytes(text,'utf-8')
-        encrypted = int.from_bytes(text, "big") * self._shared
-        #TODO: Work out the length correctly
-        encrypted = int.to_bytes(encrypted,byteorder="big",length=(1024))
+        #Converts the string to hex
+        t = bytes(text, "utf-8").hex()
+        #Multiplies the string by the shared key
+        encrypted = hex(int(t,16) * self._shared)
         return encrypted
     
     def decrypt(self, message):
-        num = int.from_bytes(message, "big")
-        num = num // self._shared
-        #TODO: Fix length here as well 
-        num = int.to_bytes(num,byteorder="big",length=(1024))
-        text = str(num)
+        #Decrypt the message
+        num = hex(int(message, 16) // self._shared)
+        #Takes off the first to chars and then converst back to string
+        text = codecs.decode(str(num)[2 : ], "hex")
+        text = str(text,'utf-8')
         return text
 
+start = time()
 Alice = key()
 P = Alice.get_P()
 G = Alice.get_G()
 Bob = key(P,G)
 print(Bob.get_P(), Bob.get_G())
 print("Gen public")
+print(time()-start)
 Alice_Public = Alice.generate_public_key()
 Bob_public = Bob.generate_public_key()
+print(time()-start)
 print("Gen shared")
 Alice.generate_shared(Bob_public)
 Bob.generate_shared(Alice_Public)
+print(time()-start)
 print(Alice.get_shared())
 print(Bob.get_shared())
 message = Alice.encrypt("test")
 print(Bob.decrypt(message))
+print(time()-start)
 

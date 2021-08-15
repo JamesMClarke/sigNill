@@ -12,12 +12,13 @@ class Client:
         tcp_port = 8080
         tcp_ip = '127.0.0.1'
         buff_size = 1024
+        alive = True
 
 
         self.tcp_sock.connect((tcp_ip,tcp_port))
         
 
-        while True:
+        while alive:
             
             data = self.tcp_sock.recv(buff_size)
             data = str(data,'utf-8')
@@ -58,13 +59,16 @@ class Client:
         while True:
             
             mesg = input()
+            
+            if( mesg =="exit"):
+                self.tcp_sock.close()
+                self.alive = False
+                exit()
             json_mesg = {"mesg":mesg}
             #converts to json
             json_mesg = js.dumps(json_mesg)
             self.tcp_sock.send(bytes(json_mesg,encoding='utf-8'))
 
 
-            if( mesg =='exit'):
-                self.tcp_sock.close()
-                exit()
+            
 client = Client()
