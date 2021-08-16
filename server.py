@@ -47,27 +47,28 @@ class Server:
     def menu(self):
         
         i = input("Input: ")
-        match i:
+
+        
             
-            case("exit"):
-                self.tcp_sock.close()
-                print("server closed")
-                sys.exit()
+        if (i== "exit"):
+            self.tcp_sock.close()
+            print("server closed") 
+            sys.exit()
 
-            case("list-clients"):
-                for connection in self.connections:
-                    print(connection)
-                if(len(self.connections) == 0):
-                    print("no connections")
+        if(i == "list-clients"):
+            for connection in self.connections:
+                print(connection)
+            if(len(self.connections) == 0):
+                print("no connections")
 
 
-            case("help"):
-                print("Available Commands:\nlist-clients\nexit\nhelp")
+        if(i== "help"):
+            print("Available Commands:\nlist-clients\nexit\nhelp")
               
                     
 
-            case(__):
-                print("not valid command")
+        else:
+            print("not valid command")
         self.menu()
 
 
