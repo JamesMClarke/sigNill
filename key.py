@@ -61,6 +61,8 @@ class Key:
         text = str(text,'utf-8')
         return text
 
+"""
+#Example set-up
 start = time()
 Alice = Key()
 P = Alice.get_P()
@@ -81,4 +83,6 @@ print(Bob.get_shared())
 message = Alice.encrypt("test")
 print(Bob.decrypt(message))
 print(time()-start)
+
+"""
 
