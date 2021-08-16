@@ -1,30 +1,45 @@
-from json import decoder
 import socket
 import threading
 import sys
-import json as js
+from key import Key
 
 #TODO redo threading and application func flow
+#TODO fix UI bug
 def main():
     
     client = Client()
-    client.connect_to_server()
+    client.handler()
 
 
 class Client:
+
+    tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __init__(self):
 
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-        self.tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-
-    def connect_to_server(self):
-
+        
         self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
         print("connected to server")
+        #send key here
+        key = Key()
+        __pub_key = key.generate_private_key()
+        __priv_key = key.generate_private_key()
+        __p = key.get_P()
+
+        print(__pub_key)
+
+        
+        self.input_thread = threading.Thread(target=self.send_mesg)                        
+        self.input_thread.daemon = True
+        self.input_thread.start()
+
+
+    def handler(self):
+
+       
 
             
         while True:    
@@ -32,10 +47,17 @@ class Client:
             data = str(data,'utf-8')
             print(data)
 
+            #if(data =="client connected"):
+             #   test_data = "test"
+              #  self.tcp_sock.send(bytes(test_data,encoding='utf-8'))
+
+
+
+
             
-            self.input_thread = threading.Thread(target=self.send_mesg)                        
-            self.input_thread.daemon = True
-            self.input_thread.start()
+            
+
+           
 
 
 
@@ -47,16 +69,18 @@ class Client:
 
 
     def send_mesg(self):
+
       
         while True:
-            #mesg =""
-            mesg = input("type message:  ")
+            self.mesg = input("type message:  ")
+
+
             
             #if (str(mesg) == "exit"):
              #   self.tcp_sock.close()
 #                sys.exit(0)
 
-            self.tcp_sock.send(bytes(mesg,encoding='utf-8'))
+            self.tcp_sock.send(bytes(self.mesg,encoding='utf-8'))
 
 
            

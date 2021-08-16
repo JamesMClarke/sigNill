@@ -84,7 +84,6 @@ class Server:
         print('server running\n')
 
 
-
         while True:
             
             c,a = self.tcp_sock.accept()
@@ -95,8 +94,6 @@ class Server:
             self.connections.append(c)
 
             data = 'client connected'
-
-
             c.send(bytes(data,encoding ='utf-8'))
 
             print("\n",str(a[0])+":"+str(a[1]),"connected")

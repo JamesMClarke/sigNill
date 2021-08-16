@@ -3,7 +3,7 @@ import codecs
 from Crypto.Util import number
 from time import time
 
-class key:
+class Key:
     _key_bits = 1024
     _P: int
     _G: int
@@ -62,10 +62,10 @@ class key:
         return text
 
 start = time()
-Alice = key()
+Alice = Key()
 P = Alice.get_P()
 G = Alice.get_G()
-Bob = key(P,G)
+Bob = Key(P,G)
 print(Bob.get_P(), Bob.get_G())
 print("Gen public")
 print(time()-start)
