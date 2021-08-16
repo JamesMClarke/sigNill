@@ -4,8 +4,6 @@ import socket,errno
 import threading
 import sys
 
-
-#TODO start each message with username
 #TODO if port is already in used use another
 #TODO add encypt message
 #TODO add kick client option
@@ -45,23 +43,24 @@ class Server:
                 break
     
     def menu(self):
-        
-        i = input("Input: ")
+        print("")
+        print("Commands:")
+        print("1: List all clients")
+        print("0: Exit")
+        i = input()
     
             
-        if (i== "exit"):
+        if (i== "0"):
             self.tcp_sock.close()
             print("server closed") 
             sys.exit()
 
-        if(i == "list-clients"):
+        #Lists all clients
+        elif(i == "1"):
             for connection in self.connections:
                 print(connection)
             if(len(self.connections) == 0):
                 print("no connections")
-
-        if(i== "help"):
-            print("Available Commands:\nlist-clients\nexit\nhelp")
             
         else:
             print("not valid command")

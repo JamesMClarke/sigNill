@@ -3,6 +3,7 @@ import threading
 import sys
 from key import Key
 
+#TODO start each message with username
 #TODO redo threading and application func flow
 #TODO fix UI bug
 def main():
