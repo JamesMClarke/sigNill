@@ -22,8 +22,16 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-        
-        self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
+
+        #if server port unavail try to connect to alternative port
+        try:
+            self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
+        except socket.error as error:
+            print("using alt port")
+            self.tcp_port = 10080
+            self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
+
+
         print("connected to server\n")
         #self.username = input("enter username:   ")
         #data = self.username,"|",self.tcp_ip

@@ -1,5 +1,6 @@
 import json as js
-import socket
+from os import error
+import socket,errno
 import threading
 import sys
 
@@ -25,7 +26,6 @@ class Server:
         
         self.menu()
     
-        #self.con, addr = self.tcp_sock.accept()
 
     def handler(self,c,a):
 
@@ -34,7 +34,7 @@ class Server:
             data = c.recv(self.buf_size)
 
             for connection in self.connections: 
-                connection[0].send(data)    
+                connection.send(data)    
 
             if not data:
                 #displays disconnected client
@@ -71,23 +71,36 @@ class Server:
     def run(self):
 
         
-        #creates TCP socket, assigns ip,port
+        #assigns server TCP ip, Port and recieving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-
-        #recieving data bugger
         self.buf_size = 30
-        self.tcp_sock.bind((tcp_ip,tcp_port))
+        
+        #binds tcp socket and listens on it
+        try :
+            self.tcp_sock.bind((tcp_ip,tcp_port))
+        except socket.error as e:
+            if e.errno == errno.EADDRINUSE:
+                print("port "+ str(tcp_port)+" in use, using alternative port")
+                tcp_port = 10080
+                self.tcp_sock.bind((tcp_ip,tcp_port))
+
         self.tcp_sock.listen(1)
         print('server running\n')
 
 
         while True:
-            
+
+            #accepts incoming connect requests 
             c,a = self.tcp_sock.accept()
-            connect_thread = threading.Thread(target=self.handler,args = (c,a))
-            connect_thread.daemon =True
-            connect_thread.start() 
+
+            print("a = ",a)
+            print("c = ",c)
+
+            #creates new client handler thread for each connected client
+            handler_thread = threading.Thread(target=self.handler,args = (c,a))
+            handler_thread.daemon =True
+            handler_thread.start() 
             
             self.connections.append(c)
 
