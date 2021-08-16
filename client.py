@@ -82,7 +82,6 @@ class Client:
                 
             if not data:
                 print('cannot connect to server')
-                print(str(data,'utf-8'))
                 break
 
 
@@ -97,8 +96,8 @@ class Client:
             if (str(self.mesg) == "exit"):
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
-                sys.exit(0)
-                break
+                sys.exit(print("client shutting down"))
+                
 
             self.tcp_sock.send(bytes(self.mesg,encoding='utf-8'))
 
