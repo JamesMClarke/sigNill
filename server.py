@@ -1,10 +1,10 @@
 import json as js
 from os import error
+from users import Users
 import socket,errno
 import threading
 import sys
 
-#TODO if port is already in used use another
 #TODO add encypt message
 #TODO add kick client option
 #TODO allow for mesg to be sent to designated client -SC
@@ -14,6 +14,7 @@ class Server:
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #connections = [[0 for i in range(3)] for j in range(10)]
     connections = []
+    users = Users()
 
     def __init__(self):
 
@@ -27,16 +28,20 @@ class Server:
 
     def handler(self,c,a):
 
+        username = ""
         while True:
-            
             data = c.recv(self.buf_size)
+            if(data.decode()[:8] == "username"):
+                d = data.decode().split(":")
+                username = d[1]
+                self.users.add_user(username, c)
 
             for connection in self.connections: 
                 connection.send(data)    
 
             if not data:
                 #displays disconnected client
-                print(str(a[0])+ str(a[1]),"disconnected")
+                print(str(username),"disconnected")
                 self.connections.remove(c)
                 c.close()
 
@@ -56,11 +61,14 @@ class Server:
             sys.exit()
 
         #Lists all clients
+        #TODO: Fix showing "User: 0"
+        #TODO: Add the rest of the connection info by returning 2d array from get_connections()
         elif(i == "1"):
-            for connection in self.connections:
-                print(connection)
-            if(len(self.connections) == 0):
-                print("no connections")
+            users = self.users.get_all_usernames()
+            for name in users:
+                print("User: "+str(name))
+
+        
             
         else:
             print("not valid command")

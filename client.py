@@ -55,7 +55,7 @@ class Client:
 
     #only run once!
     def send_user_data(self):
-        data = self.username, self.tcp_ip
+        data = "username:"+self.username
         self.tcp_sock.send(bytes(str(data),'utf-8'))
         pass
 
@@ -70,17 +70,6 @@ class Client:
              #   test_data = "test"
               #  self.tcp_sock.send(bytes(test_data,encoding='utf-8'))
 
-
-
-
-            
-            
-
-           
-
-
-
-                
             if not data:
                 print('cannot connect to server')
                 break
@@ -92,14 +81,11 @@ class Client:
         while True:
             self.mesg = input("type message:  ")
 
-
-            
             if (str(self.mesg) == "exit"):
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
                 sys.exit(print("client shutting down"))
                 
-
             self.tcp_sock.send(bytes(self.mesg,encoding='utf-8'))
 
 
