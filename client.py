@@ -11,9 +11,11 @@ def main():
     client.handler()
 
 
+
 class Client:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    username = ""
 
     def __init__(self):
 
@@ -22,14 +24,19 @@ class Client:
         self.buff_size = 1024
         
         self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
-        print("connected to server")
-        #send key here
-        key = Key()
-        __pub_key = key.generate_private_key()
-        __priv_key = key.generate_private_key()
-        __p = key.get_P()
+        print("connected to server\n")
+        #self.username = input("enter username:   ")
+        #data = self.username,"|",self.tcp_ip
 
-        print(__pub_key)
+        #self.tcp_sock.send(bytes(str(data),encoding='utf-8'))
+
+        #send key here
+        #key = Key()
+        #__pub_key = key.generate_private_key()
+        #__priv_key = key.generate_private_key()
+        #__p = key.get_P()
+
+        #print(__pub_key)
 
         
         self.input_thread = threading.Thread(target=self.send_mesg)                        

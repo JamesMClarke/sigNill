@@ -8,12 +8,12 @@ import sys
 #TODO if port is already in used use another
 #TODO add encypt message
 #TODO add kick client option
-#TODO add if stmnts for when server conn is lost or down
-#TODO first status, secret data, then allow messaging
+#TODO allow for mesg to be sent to designated client -SC
 
 class Server:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #connections = [[0 for i in range(3)] for j in range(10)]
     connections = []
 
     def __init__(self):
@@ -34,9 +34,7 @@ class Server:
             data = c.recv(self.buf_size)
 
             for connection in self.connections: 
-                connection.send(data)
-                
-
+                connection[0].send(data)    
 
             if not data:
                 #displays disconnected client
@@ -93,8 +91,8 @@ class Server:
             
             self.connections.append(c)
 
-            data = 'client connected'
-            c.send(bytes(data,encoding ='utf-8'))
+            #data = 'client connected'
+            #c.send(bytes(data,encoding ='utf-8'))
 
             print("\n",str(a[0])+":"+str(a[1]),"connected")
 
