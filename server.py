@@ -32,8 +32,10 @@ class Server:
         while True:
             
             data = c.recv(self.buf_size)
+
             for connection in self.connections: 
                 connection.send(data)
+                
 
 
             if not data:
@@ -47,8 +49,7 @@ class Server:
     def menu(self):
         
         i = input("Input: ")
-
-        
+    
             
         if (i== "exit"):
             self.tcp_sock.close()
@@ -61,12 +62,9 @@ class Server:
             if(len(self.connections) == 0):
                 print("no connections")
 
-
         if(i== "help"):
             print("Available Commands:\nlist-clients\nexit\nhelp")
-              
-                    
-
+            
         else:
             print("not valid command")
         self.menu()
@@ -93,14 +91,10 @@ class Server:
             connect_thread = threading.Thread(target=self.handler,args = (c,a))
             connect_thread.daemon =True
             connect_thread.start() 
-
             
             self.connections.append(c)
-            #sends status ok
 
-            #test json status data
-            data = '{"status":"ok"}'
-            #data = '{"status":"fail"}'
+            data = 'client connected'
 
 
             c.send(bytes(data,encoding ='utf-8'))
