@@ -19,6 +19,7 @@ class Client:
 
     def __init__(self):
 
+        self.username = input("enter username:   ")        
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
@@ -26,17 +27,17 @@ class Client:
         #if server port unavail try to connect to alternative port
         try:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
+            self.send_user_data()
         except socket.error as error:
             print("using alt port")
             self.tcp_port = 10080
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
+            self.send_user_data()
+
 
 
         print("connected to server\n")
-        #self.username = input("enter username:   ")
-        #data = self.username,"|",self.tcp_ip
 
-        #self.tcp_sock.send(bytes(str(data),encoding='utf-8'))
 
         #send key here
         #key = Key()
@@ -51,12 +52,14 @@ class Client:
         self.input_thread.daemon = True
         self.input_thread.start()
 
+    #only run once!
+    def send_user_data(self):
+        data = self.username, self.tcp_ip
+        self.tcp_sock.send(bytes(str(data),'utf-8'))
+        pass
 
     def handler(self):
-
-       
-
-            
+   
         while True:    
             data = self.tcp_sock.recv(self.buff_size)
             data = str(data,'utf-8')
@@ -91,9 +94,11 @@ class Client:
 
 
             
-            #if (str(mesg) == "exit"):
-             #   self.tcp_sock.close()
-#                sys.exit(0)
+            if (str(self.mesg) == "exit"):
+                self.tcp_sock.shutdown(1)
+                self.tcp_sock.close()
+                sys.exit(0)
+                break
 
             self.tcp_sock.send(bytes(self.mesg,encoding='utf-8'))
 

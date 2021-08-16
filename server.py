@@ -77,6 +77,7 @@ class Server:
         self.buf_size = 30
         
         #binds tcp socket and listens on it
+        #if port in use, alt port num is used
         try :
             self.tcp_sock.bind((tcp_ip,tcp_port))
         except socket.error as e:
