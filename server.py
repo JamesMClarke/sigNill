@@ -30,14 +30,16 @@ class Server:
 
         username = ""
         while True:
+            #loads json object
             data = c.recv(self.buf_size)
-            if(data.decode()[:8] == "username"):
-                d = data.decode().split(":")
-                username = d[1]
+            data = js.loads(data.decode('utf-8'))
+            print(data["username"])
+            if("username" in data):
+                username = data["username"]
                 self.users.add_user(username, c)
 
-            for connection in self.connections: 
-                connection.send(data)    
+            #for connection in self.connections: 
+             #   connection.send(data)    
 
             if not data:
                 #displays disconnected client
@@ -52,27 +54,27 @@ class Server:
         print("Commands:")
         print("1: List all clients")
         print("0: Exit")
-        i = input()
-    
-            
-        if (i== "0"):
-            self.tcp_sock.close()
-            print("server closed") 
-            sys.exit()
-
-        #Lists all clients
-        #TODO: Fix showing "User: 0"
-        #TODO: Add the rest of the connection info by returning 2d array from get_connections()
-        elif(i == "1"):
-            users = self.users.get_all_usernames()
-            for name in users:
-                print("User: "+str(name))
-
+        while True:
+            i = input()
         
+                
+            if (i== "0"):
+                self.tcp_sock.close()
+                print("server closed") 
+                sys.exit()
+
+            #Lists all clients
+            #TODO: Fix showing "User: 0"
+            #TODO: Add the rest of the connection info by returning 2d array from get_connections()
+            elif(i == "1"):
+                users = self.users.get_all_usernames()
+                for name in users:
+                    print("User: "+str(name))
+
             
-        else:
-            print("not valid command")
-        self.menu()
+                
+            else:
+                print("not valid command")
 
 
     def run(self):
@@ -101,9 +103,6 @@ class Server:
 
             #accepts incoming connect requests 
             c,a = self.tcp_sock.accept()
-
-            print("a = ",a)
-            print("c = ",c)
 
             #creates new client handler thread for each connected client
             handler_thread = threading.Thread(target=self.handler,args = (c,a))

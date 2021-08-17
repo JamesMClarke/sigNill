@@ -2,6 +2,7 @@ import socket
 import threading
 import sys
 from key import Key
+import json as js
 
 #TODO start each message with username
 #TODO redo threading and application func flow
@@ -55,9 +56,8 @@ class Client:
 
     #only run once!
     def send_user_data(self):
-        data = "username:"+self.username
-        self.tcp_sock.send(bytes(str(data),'utf-8'))
-        pass
+        data = js.dumps({"username":self.username})
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
     def handler(self):
    
@@ -65,6 +65,7 @@ class Client:
             data = self.tcp_sock.recv(self.buff_size)
             data = str(data,'utf-8')
             print(data)
+
 
             #if(data =="client connected"):
              #   test_data = "test"
@@ -76,6 +77,7 @@ class Client:
 
 
     def send_mesg(self):
+        target = input("Who do you want to message")
 
       
         while True:
@@ -85,8 +87,10 @@ class Client:
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
                 sys.exit(print("client shutting down"))
+            data = {"target":target,"message":self.mesg}
+            print(js.dumps(data))
                 
-            self.tcp_sock.send(bytes(self.mesg,encoding='utf-8'))
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
 
            
