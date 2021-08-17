@@ -63,8 +63,13 @@ class Client:
    
         while True:    
             data = self.tcp_sock.recv(self.buff_size)
-            data = str(data,'utf-8')
             print(data)
+
+            data = js.loads(data.decode('utf-8'))
+            if("target" in data):
+                sender = data["target"]
+                recv_message = data["message"]
+                print(sender,": ",recv_message)
 
 
             #if(data =="client connected"):
@@ -77,19 +82,20 @@ class Client:
 
 
     def send_mesg(self):
-        target = input("Who do you want to message")
+        target = input("Who do you want to message: " )
 
       
         while True:
-            self.mesg = input("type message:  ")
+            mesg = input("type message:  ")
 
-            if (str(self.mesg) == "exit"):
+            if (str(mesg) == "exit"):
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
                 sys.exit(print("client shutting down"))
-            data = {"target":target,"message":self.mesg}
-            print(js.dumps(data))
-                
+
+            data = js.dumps({"target":target,"message":mesg})
+            print(data)
+
             self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
 

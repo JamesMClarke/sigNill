@@ -29,17 +29,30 @@ class Server:
     def handler(self,c,a):
 
         username = ""
+        message = ""
         while True:
             #loads json object
+            data =""
             data = c.recv(self.buf_size)
-            data = js.loads(data.decode('utf-8'))
-            print(data["username"])
+            data = js.loads(data)
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
+                print(username,str(a[0])+":"+str(a[1]),"connected")
+            #print(data)
+            #directed messages bugged 
+            elif("target" in data):
+                print(data)
+                target_name = data["target"]
+                message = data["message"]
+                target_ip = Users.find_conn_by_name(target_name)
+            
+                if(target_ip != None):
+                    #create json object with username of sender and message
+                    data_to_send = js.dumps({"username":username,"message":message})
+                    target_ip.send(data_to_send)
+                pass
 
-            #for connection in self.connections: 
-             #   connection.send(data)    
 
             if not data:
                 #displays disconnected client
@@ -109,12 +122,7 @@ class Server:
             handler_thread.daemon =True
             handler_thread.start() 
             
-            self.connections.append(c)
-
-            #data = 'client connected'
-            #c.send(bytes(data,encoding ='utf-8'))
-
-            print("\n",str(a[0])+":"+str(a[1]),"connected")
+        
 
 
         
