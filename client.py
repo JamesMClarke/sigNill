@@ -93,7 +93,7 @@ class Client:
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
                 sys.exit(print("client shutting down"))
-            mesg ="test"
+
             data = {
                 'target':target,
                 'message':mesg

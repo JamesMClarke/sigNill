@@ -36,23 +36,24 @@ class Server:
             print(data)
             data = js.loads(data)
                 
-
+            #adds username and connect addr to users array
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
             
             #directed messages bugged 
-            if all(key in data for key in ('target','message')):
-                target_name = data["target"]
-                message = data["message"]
-                target_ip = Users.find_conn_by_name(target_name)
+            if all(key in data for key in ("target","message")):
+                username_to_find = str(data["target"])
+                message = str(data["message"])
+                print(username_to_find)
+                target_ip = self.users.find_conn_by_name(username_to_find)
             
                 if(target_ip != None):
                     #create json object with username of sender and message
                     data_to_send = js.dumps({"username":username,"message":message})
-                    target_ip.send(data_to_send)
-                pass
+                    data = js.dumps(data)
+                    target_ip.send(bytes(data_to_send,encoding='utf-8'))
 
 
             if not data:

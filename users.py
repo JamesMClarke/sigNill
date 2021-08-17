@@ -15,7 +15,8 @@ class Users:
             if(username_to_find == u.get_username()):
                 return u.get_connection()
             else:
-                return 
+                print("no user")
+            
     
     def get_all_usernames(self):
         names = [0]
