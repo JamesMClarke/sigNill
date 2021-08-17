@@ -4,9 +4,11 @@ import sys
 from key import Key
 import json as js
 
-#TODO start each message with username
 #TODO redo threading and application func flow
 #TODO fix UI bug
+#TODO sanitize input
+#TODO if incoming message allow response without having to declare who you want to send to
+#TODO reduce redundant code
 def main():
     
     client = Client()
