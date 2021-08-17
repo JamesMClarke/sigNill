@@ -72,6 +72,9 @@ class Client:
                 recv_message = data["message"]
                 print(sender,": ",recv_message)
 
+            if all(key in data for key in ("username","message")):
+                print(data["username"],": ",data['message'])
+
 
             #if(data =="client connected"):
              #   test_data = "test"
@@ -100,7 +103,7 @@ class Client:
                 }
 
             data = js.dumps(data)
-            print(data)
+            #print(data)
 
             self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
