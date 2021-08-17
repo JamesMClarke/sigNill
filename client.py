@@ -56,7 +56,8 @@ class Client:
 
     #only run once!
     def send_user_data(self):
-        data = js.dumps({"username":self.username})
+        data = js.dumps({'username':self.username})
+        print(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
     def handler(self):
@@ -92,8 +93,13 @@ class Client:
                 self.tcp_sock.shutdown(1)
                 self.tcp_sock.close()
                 sys.exit(print("client shutting down"))
+            mesg ="test"
+            data = {
+                'target':target,
+                'message':mesg
+                }
 
-            data = js.dumps({"target":target,"message":mesg})
+            data = js.dumps(data)
             print(data)
 
             self.tcp_sock.send(bytes(data,encoding='utf-8'))

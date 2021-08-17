@@ -32,17 +32,18 @@ class Server:
         message = ""
         while True:
             #loads json object
-            data =""
             data = c.recv(self.buf_size)
+            print(data)
             data = js.loads(data)
+                
+
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
-            #print(data)
+            
             #directed messages bugged 
-            elif("target" in data):
-                print(data)
+            if all(key in data for key in ('target','message')):
                 target_name = data["target"]
                 message = data["message"]
                 target_ip = Users.find_conn_by_name(target_name)
@@ -96,7 +97,7 @@ class Server:
         #assigns server TCP ip, Port and recieving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-        self.buf_size = 30
+        self.buf_size = 128
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
