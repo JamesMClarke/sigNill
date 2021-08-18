@@ -16,28 +16,34 @@ def main():
     client = Client()
 
 class Client:
-
+    
+    #creates socket 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     username = ""
 
     def __init__(self):
-
+        #initializes connection variables
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
+        
+        #lets user define thier username
         self.username = input("enter username:   ")
 
         self.menu()
        
-    #only run once!
+    #sends username to server to be added to server users list
     def send_user_data(self):
         
         data = js.dumps({'username':self.username})
         print(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
+
+    #handles data sent from the server
     def handler(self):
-   
+
+        #starts message input on seperate thread
         self.input_thread = threading.Thread(target=self.send_mesg)                        
         self.input_thread.daemon = True
         self.input_thread.start()
@@ -60,6 +66,7 @@ class Client:
                 print('cannot connect to server')
                 break
 
+    #sends message to server based on username of recipent who is set as target
     def send_mesg(self):
 
         target = input("Who do you want to message: " )
@@ -80,7 +87,7 @@ class Client:
             data = js.dumps(data)
             self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
-        
+    #initializes connection to server 
     def connect_to_server(self):
         try:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
@@ -94,9 +101,11 @@ class Client:
             self.send_user_data()
             print("connected to server")
     
+    #method to send pulbic key
     def send_pub_key(self):
+     
         pass
-    
+    #method to encrpy mesg
     def encrypt_mesg(self,mesg):
         encrypted = True
         spinner = itertools.cycle(['-','/','|','\\'])
@@ -104,11 +113,12 @@ class Client:
             sys.stdout.write(next(spinner))
             sys.stdout.flush()
             sys.stdout.write('\b')
-            
+
             #encrypt message here
             encrypted == True
         pass
-
+    
+    #user menu dislayed at start up
     def menu(self):
         
         print("commands:\n0: start chat\n1: edit username\n2: exit")

@@ -11,16 +11,17 @@ import sys
 class Server:
 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #connections = [[0 for i in range(3)] for j in range(10)]
     connections = []
     users = Users()
 
     def __init__(self):
 
-
+        #server run method is ran on sperate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
         run_thread.start()
+
+        #server menu is ran on main thread
         self.menu()
     
 
@@ -29,12 +30,12 @@ class Server:
         username = ""
         message = ""
         while True:
-            #loads json object
+            #loads json object sent by client
             data = c.recv(self.buf_size)
             print(data)
             data = js.loads(data)
                 
-            #adds username and connect addr to users array
+            #adds connecting client username and ip address to users array
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
@@ -49,19 +50,19 @@ class Server:
 
                 #if target_ip not null senders name and message is sent to recipent
                 if(target_ip != None):
-                    #create json object with username of sender and message
+                    #create json object with username of sender and message so that the recpent knows who sent the message
                     data_to_send = js.dumps({"username":username,"message":message})
                     data = js.dumps(data)
                     target_ip.send(bytes(data_to_send,encoding='utf-8'))
 
-
+            # if no data connection lost client connection closed close
             if not data:
                 #displays disconnected client
                 print(str(username),"disconnected")
                 self.connections.remove(c)
                 c.close()
                 break
-    
+    #server menu
     def menu(self):
         print("\nCommands: \n1: List all clients\n0: Exit")       
         while True:
@@ -83,7 +84,7 @@ class Server:
             else:
                 print("not valid command")
 
-
+    #initializes server
     def run(self):
 
         #assigns server TCP ip, Port and recieving data buffer size
