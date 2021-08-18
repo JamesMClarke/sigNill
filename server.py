@@ -15,7 +15,6 @@ class Server:
     users = Users()
 
     def __init__(self):
-
         #server run method is ran on sperate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
@@ -39,6 +38,7 @@ class Server:
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
+                print(a)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
             
             #direct messaging if keys target and message in data retrieves target ip by searching for username
@@ -64,25 +64,32 @@ class Server:
                 break
     #server menu
     def menu(self):
-        print("\nCommands: \n1: List all clients\n0: Exit")       
         while True:
+            print("\nCommands: \n1: List all clients\n0: Exit") 
             i = input()
-        
-                
+
+            #Closes connections and exits server 
             if (i== "0"):
                 self.tcp_sock.close()
-                print("server closed") 
+                print("Server closed") 
                 sys.exit()
 
             #Lists all clients
-            #TODO: Fix showing "User: 0"
-            #TODO: Add the rest of the connection info by returning 2d array from get_connections()
             elif(i == "1"):
-                users = self.users.get_all_usernames()
-                for name in users:
-                    print("User: "+str(name)) 
+                no_of_users = self.users.get_no_of_users()
+                print("No of users:"+str(no_of_users))
+                #If there are currently clients connected, then prints name and connection
+                if(no_of_users > 0):
+                    info = self.users.get_all()
+                    print(info)
+                    for i in info:
+                        print("User: "+str(i[0]))
+                        print("Conn: "+str(i[1]))
+                else:
+                    print("There are currently no clients connected")
+
             else:
-                print("not valid command")
+                print("Please enter a valid command")
 
     #initializes server
     def run(self):

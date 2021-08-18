@@ -120,17 +120,20 @@ class Client:
     
     #user menu dislayed at start up
     def menu(self):
-        
-        print("commands:\n0: start chat\n1: edit username\n2: exit")
+        print("commands:\n1: start chat\n2: edit username\n0: exit")
         cmd = input("enter command: ")
-        if(cmd =="0"):
+        if(cmd =="1"):
             self.connect_to_server()
             self.handler()
 
-        if(cmd == "1"):
+        elif(cmd == "2"):
+            #TODO: Add chaning username
+            #If this is changed after the user has already connected to the server it will need to be changed there as well
             pass
-        if(cmd =="2"):
-            pass
+        elif(cmd =="0"):
+            quit()
+        else:
+            print("Invalid command")
            
 if __name__ == "__main__":
     main()
