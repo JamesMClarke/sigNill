@@ -7,7 +7,6 @@ import sys
 
 #TODO add encypt message
 #TODO add kick client option
-#TODO allow for mesg to be sent to designated client -SC
 
 class Server:
 
@@ -18,11 +17,10 @@ class Server:
 
     def __init__(self):
 
-        
+
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
         run_thread.start()
-        
         self.menu()
     
 
@@ -48,7 +46,8 @@ class Server:
                 message = str(data["message"])
                 print(username_to_find)
                 target_ip = self.users.find_conn_by_name(username_to_find)
-            
+
+                #if target_ip not null senders name and message is sent to recipent
                 if(target_ip != None):
                     #create json object with username of sender and message
                     data_to_send = js.dumps({"username":username,"message":message})
@@ -61,7 +60,6 @@ class Server:
                 print(str(username),"disconnected")
                 self.connections.remove(c)
                 c.close()
-
                 break
     
     def menu(self):
@@ -84,17 +82,13 @@ class Server:
             elif(i == "1"):
                 users = self.users.get_all_usernames()
                 for name in users:
-                    print("User: "+str(name))
-
-            
-                
+                    print("User: "+str(name)) 
             else:
                 print("not valid command")
 
 
     def run(self):
 
-        
         #assigns server TCP ip, Port and recieving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
@@ -113,9 +107,7 @@ class Server:
         self.tcp_sock.listen(1)
         print('server running\n')
 
-
         while True:
-
             #accepts incoming connect requests 
             c,a = self.tcp_sock.accept()
 

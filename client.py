@@ -4,9 +4,12 @@ import sys
 from key import Key
 import json as js
 
-#TODO sanitize input
-#TODO if incoming message allow response without having to declare who you want to send to
+#TODO sanitize input -SC
+#TODO if incoming message allow reponse response without having to declare who you want to send to -SC
+#TODO make username only have to be set once and then save to a config file as xml or json -SC
+#TODO add encrypt message
 #TODO add menu
+
 def main():
     
     client = Client()
@@ -26,8 +29,6 @@ class Client:
         self.buff_size = 1024
 
         self.username = input("enter username:   ")
-        #print("Avaiblable commands\n0: exit\n1: start a chat")
-        #command = input("Input Command")
         self.connect_to_server()
         
         self.input_thread = threading.Thread(target=self.send_mesg)                        
@@ -89,7 +90,9 @@ class Client:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             self.send_user_data()
             print("connected to server")
-
+    
+    def encrypt_mesg(self,mesg):
+        pass
     
            
 if __name__ == "__main__":
