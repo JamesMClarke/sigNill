@@ -30,18 +30,18 @@ class Server:
         username = ""
         message = ""
         while True:
-            #loads json object sent by client
+            #loads data json object sent by client
             data = c.recv(self.buf_size)
             print(data)
             data = js.loads(data)
                 
-            #adds connecting client username and ip address to users array
+            # if key username in data, adds connecting client username and ip address to users array
             if("username" in data):
                 username = data["username"]
                 self.users.add_user(username, c)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
             
-            #direct messaging if keys in data get target ip
+            #direct messaging if keys target and message in data retrieves target ip by searching for username
             if all(key in data for key in ("target","message")):
                 username_to_find = str(data["target"])
                 message = str(data["message"])
