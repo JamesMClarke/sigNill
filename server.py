@@ -5,8 +5,8 @@ import socket,errno
 import threading
 import sys
 
-#TODO add encypt message
 #TODO add kick client option
+#TODO add server status log
 
 class Server:
 
@@ -40,7 +40,7 @@ class Server:
                 self.users.add_user(username, c)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
             
-            #directed messages bugged 
+            #direct messaging if keys in data get target ip
             if all(key in data for key in ("target","message")):
                 username_to_find = str(data["target"])
                 message = str(data["message"])
@@ -63,10 +63,7 @@ class Server:
                 break
     
     def menu(self):
-        print("")
-        print("Commands:")
-        print("1: List all clients")
-        print("0: Exit")
+        print("\nCommands: \n1: List all clients\n0: Exit")       
         while True:
             i = input()
         
@@ -105,7 +102,7 @@ class Server:
                 self.tcp_sock.bind((tcp_ip,tcp_port))
 
         self.tcp_sock.listen(1)
-        print('server running\n')
+        print('server running')
 
         while True:
             #accepts incoming connect requests 

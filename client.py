@@ -1,14 +1,14 @@
 import socket
 import threading
-import sys
 from key import Key
 import json as js
+from datetime import datetime
 
-#TODO sanitize input -SC
 #TODO if incoming message allow reponse response without having to declare who you want to send to -SC
-#TODO make username only have to be set once and then save to a config file as xml or json -SC
+#TODO make username only have to be set once and then save to a config file as xml or json confer with -JC
 #TODO add encrypt message
 #TODO add menu
+#TODO fix direct messaging logic
 
 def main():
     
@@ -47,9 +47,8 @@ class Client:
    
         while True:    
             data = self.tcp_sock.recv(self.buff_size)
-            print(data)
-
             data = js.loads(data.decode('utf-8'))
+
             # gets target might remove
             if("target" in data):
                 sender = data["target"]
@@ -69,9 +68,10 @@ class Client:
         target = input("Who do you want to message: " )
         while True:
             mesg = input("type message:  ")
+            time_sent = "  time sent:"+datetime.now().strftime("%H:%m")
             data = {
                 'target':target,
-                'message':mesg
+                'message':mesg+str(time_sent)
                 }
 
             data = js.dumps(data)
@@ -90,6 +90,9 @@ class Client:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             self.send_user_data()
             print("connected to server")
+    
+    def send_pub_key(self):
+        pass
     
     def encrypt_mesg(self,mesg):
         pass
