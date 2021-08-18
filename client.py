@@ -1,20 +1,19 @@
 import socket
+import sys
 import threading
 from key import Key
 import json as js
 from datetime import datetime
+import itertools,sys
 
 #TODO if incoming message allow reponse response without having to declare who you want to send to -SC
 #TODO make username only have to be set once and then save to a config file as xml or json confer with -JC
 #TODO add encrypt message
-#TODO add menu
+#TODO add menu 
 
 def main():
     
     client = Client()
-    #client.handler()
-
-
 
 class Client:
 
@@ -26,12 +25,9 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-
-
         self.username = input("enter username:   ")
 
-        self.connect_to_server()
-        self.handler()
+        self.menu()
        
     #only run once!
     def send_user_data(self):
@@ -70,6 +66,12 @@ class Client:
         while True:
             mesg = input("type message:  ")
             time_sent = "  time sent:"+datetime.now().strftime("%H:%m")
+            
+            if(mesg ==":q"):
+                self.tcp_sock.shutdown(0)
+                self.tcp_sock.close()
+                sys.exit("client closing")
+            
             data = {
                 'target':target,
                 'message':mesg+str(time_sent)
@@ -96,8 +98,29 @@ class Client:
         pass
     
     def encrypt_mesg(self,mesg):
+        encrypted = True
+        spinner = itertools.cycle(['-','/','|','\\'])
+        while encrypted == False:
+            sys.stdout.write(next(spinner))
+            sys.stdout.flush()
+            sys.stdout.write('\b')
+            
+            #encrypt message here
+            encrypted == True
         pass
-    
+
+    def menu(self):
+        
+        print("commands:\n0: start chat\n1: edit username\n2: exit")
+        cmd = input("enter command: ")
+        if(cmd =="0"):
+            self.connect_to_server()
+            self.handler()
+
+        if(cmd == "1"):
+            pass
+        if(cmd =="2"):
+            pass
            
 if __name__ == "__main__":
     main()
