@@ -1,15 +1,15 @@
-import socket
-import sys
-import threading
 from key import Key
 import json as js
 from datetime import datetime
-import itertools,sys
+import itertools, sys, socket, threading
 
-#TODO if incoming message allow reponse response without having to declare who you want to send to -SC
+#TODO if incoming message allow user to respond without having to declare who you want to send to -SC
 #TODO make username only have to be set once and then save to a config file as xml or json confer with -JC
 #TODO add encrypt message
-#TODO add menu 
+#TODO Store shared key after it has been generated maybe
+#TODO Add a way to get back to the menu from messaging
+#TODO Add sometype of feedback to say the message has been received
+#TODO Add some type of userinput sanitization
 
 def main():
     
@@ -27,7 +27,7 @@ class Client:
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
         
-        #lets user define thier username
+        #lets user define their username
         self.username = input("enter username:   ")
 
         self.menu()
@@ -127,8 +127,9 @@ class Client:
             self.handler()
 
         elif(cmd == "2"):
-            #TODO: Add chaning username
+            #TODOFull impellent changing username
             #If this is changed after the user has already connected to the server it will need to be changed there as well
+            self.username = input("enter username:   ")
             pass
         elif(cmd =="0"):
             quit()

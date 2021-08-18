@@ -7,6 +7,8 @@ import sys
 
 #TODO add kick client option
 #TODO add server status log
+#TODO Add response to the user if the person they are trying to message isn't connected
+#TODO Add some type of userinput sanitization
 
 class Server:
 
@@ -15,7 +17,7 @@ class Server:
     users = Users()
 
     def __init__(self):
-        #server run method is ran on sperate thread 
+        #server run method is ran on separate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
         run_thread.start()
@@ -94,7 +96,7 @@ class Server:
     #initializes server
     def run(self):
 
-        #assigns server TCP ip, Port and recieving data buffer size
+        #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
         self.buf_size = 128
