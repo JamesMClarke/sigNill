@@ -9,6 +9,7 @@ import json as js
 #TODO sanitize input
 #TODO if incoming message allow response without having to declare who you want to send to
 #TODO reduce redundant code
+#TODO add menu
 def main():
     
     client = Client()
