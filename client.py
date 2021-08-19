@@ -1,17 +1,20 @@
 from key import Key
 import json as js
 from datetime import datetime
+from time import sleep
 import itertools, sys, socket, threading
 
+#TODO Work out why the program continues to run after the serveer is closed
+#Maybe we might have to send a message for the server back to the clients to say it is closing idk
 #TODO if incoming message allow user to respond without having to declare who you want to send to -SC
-#TODO make username only have to be set once and then save to a config file as xml or json confer with -JC
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
-#TODO Add a way to get back to the menu from messaging
 #TODO Add sometype of feedback to say the message has been received
 #TODO Add load username, text colour from config json
 #TODO Add choose text colour 
+
 config_file = 'data/config.json'
+branch = "dev"
 def main():
     
     client = Client()
@@ -30,7 +33,7 @@ class Client:
 
 
 
-        if(self.load_user_config(config_file)):
+        if(self.load_user_config(config_file) and branch != "dev"):
             print(self.username)
         else:
             self.create_user()
@@ -55,51 +58,60 @@ class Client:
         self.input_thread.daemon = True
         self.input_thread.start()
 
-        while True:    
+        self.handler_loop = True
+
+        while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
-            data = js.loads(data.decode('utf-8'))
+            print(data)
+            if(len(data) > 0):
+                data = js.loads(data.decode('utf-8'))
 
-            # gets target might remove
-            if("target" in data):
-                sender = data["target"]
-                recv_message = data["message"]
-                print(sender,": ",recv_message)
+                # gets target might remove
+                if("target" in data):
+                    sender = data["target"]
+                    recv_message = data["message"]
+                    print(sender,": ",recv_message)
 
-            #if message sent from sender print
-            if all(key in data for key in ("username","message")):
-                print(data["username"],": ",data['message'])
+                #if message sent from sender print
+                if all(key in data for key in ("username","message")):
+                    print(data["username"],": ",data['message'])
 
-            if not data:
-                print('cannot connect to server')
-                break
+                if not data:
+                    print('Cannot connect to server')
+                    break
+        
+        self.menu()
 
     #sends message to server based on username of recipent who is set as target
     def send_mesg(self):
 
         target = input("Who do you want to message: " )
         
-        while True:
+        self.mesg_loop = True
+        while self.mesg_loop:
             mesg = input("type message:  ")
             #char limit on message
+            #TODO Fix this, I think it can easily be tricked byt
             if(len(mesg)>50):
-                print("there is a 50 character limit on messages")
-                mesg = input("type message:  ")
-
-            mesg = self.sanitise_input(mesg)        
-            time_sent = "  time sent:"+datetime.now().strftime("%H:%m")
+                print("There is a 50 character limit on messages")
+                mesg = input("Type message:  ")
             
             if(mesg ==":q"):
-                self.tcp_sock.shutdown(0)
-                self.tcp_sock.close()
-                sys.exit("client closing")
-            
-            data = {
-                'target':target,
-                'message':mesg+str(time_sent)
-                }
+                self.handler_loop = False
+                self.mesg_loop = False
+            else:
+                mesg = self.sanitise_input(mesg)        
+                time_sent =datetime.now().strftime("%H:%m")
 
-            data = js.dumps(data)
-            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                data = {
+                    'target':target,
+                    'message':mesg,
+                    'time_sent':str(time_sent)
+                    }
+
+                data = js.dumps(data)
+                self.tcp_sock.send(bytes(data,encoding='utf-8'))
+        self.menu()
 
     #initializes connection to server 
     def connect_to_server(self):
@@ -119,7 +131,8 @@ class Client:
     def send_pub_key(self):
      
         pass
-    #method to encrpy mesg
+
+    #method to encrypt mesg
     def encrypt_mesg(self,mesg):
         encrypted = True
         spinner = itertools.cycle(['-','/','|','\\'])
@@ -138,15 +151,24 @@ class Client:
         print("commands:\n1: start chat\n2: edit username\n0: exit")
         cmd = input("enter command: ")
         if(cmd =="1"):
-            self.connect_to_server()
+            try:
+                self.connect_to_server()
+            except OSError:
+                pass
             self.handler()
 
         elif(cmd == "2"):
-            #TODOFull impellent changing username
+            #TODO Fully impellent changing username
             #If this is changed after the user has already connected to the server it will need to be changed there as well
             self.username = input("enter username:   ")
             pass
         elif(cmd =="0"):
+            try:
+                self.tcp_sock.shutdown(0)
+                self.tcp_sock.close()
+            except OSError:
+                pass
+            sys.exit("Client closing")
             quit()
         else:
             print("Invalid command")
@@ -203,7 +225,7 @@ class Client:
 
     #sanitizes input strings
     def sanitise_input(self,input):
-        
+        #TODO Change sanitization to whitelist
         #array of characters to be removed from string
         s_list = ['?','.','!','/','#','$','%','<','>',':']
         translation = input.maketrans({i:"" for i in s_list})
