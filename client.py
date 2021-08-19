@@ -153,6 +153,7 @@ class Client:
     #sanitizes input strings
     def sanitise_input(self,input):
         
+        #array of characters to be removed from string
         s_list = ['?','.','!','/','#','$','%','<','>',':']
         translation = input.maketrans({i:"" for i in s_list})
         res_str = input.translate(translation)
