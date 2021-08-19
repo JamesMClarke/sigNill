@@ -4,8 +4,6 @@ from datetime import datetime
 from time import sleep
 import itertools, sys, socket, threading
 
-#TODO Work out why the program continues to run after the serveer is closed
-#Maybe we might have to send a message for the server back to the clients to say it is closing idk
 #TODO if incoming message allow user to respond without having to declare who you want to send to -SC
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
@@ -79,6 +77,8 @@ class Client:
                 if not data:
                     print('Cannot connect to server')
                     break
+            else:
+                self.handler_loop = False
         
         self.menu()
 
