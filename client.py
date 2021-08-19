@@ -9,8 +9,9 @@ import itertools, sys, socket, threading
 #TODO Store shared key after it has been generated maybe
 #TODO Add a way to get back to the menu from messaging
 #TODO Add sometype of feedback to say the message has been received
-#TODO Add some type of userinput sanitization
-
+#TODO Add load username, text colour from config json
+#TODO Add choose text colour 
+config_file = 'data/config.json'
 def main():
     
     client = Client()
@@ -26,14 +27,14 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-        
-        #lets user define their username
-        self.username = input("enter username:   ")
-        if(len(self.username)>10):
-            print("Username is limited to 10 characters")
-            self.username = input("enter username:   ")
-        self.username = self.sanitise_input(self.username)
-        print(self.username)
+
+
+
+        if(self.load_user_config(config_file)):
+            print(self.username)
+        else:
+            self.create_user()
+            print(self.username)
 
 
         self.menu()
@@ -79,11 +80,12 @@ class Client:
         
         while True:
             mesg = input("type message:  ")
+            #char limit on message
             if(len(mesg)>50):
                 print("there is a 50 character limit on messages")
                 mesg = input("type message:  ")
 
-            self.sanitise_input(input)        
+            mesg = self.sanitise_input(mesg)        
             time_sent = "  time sent:"+datetime.now().strftime("%H:%m")
             
             if(mesg ==":q"):
@@ -149,7 +151,56 @@ class Client:
         else:
             print("Invalid command")
 
-    
+    #if users is not found in config.json, creates username
+    def create_user(self):
+
+        #lets user define their username
+        self.username = input("enter username:   ")
+        if(len(self.username)>10):
+            print("Username is limited to 10 characters")
+            self.username = input("enter username:   ")
+        #prevents blank username
+        if(self.username ==""):
+            self.create_user()
+
+        self.username = self.sanitise_input(self.username)
+        self.save_to_config(config_file)
+
+     
+    #loads user config infomation, if username not found in config returns null and runs create user
+    def load_user_config(self,file):
+        username_found = False
+        try: 
+            with open (file,"r") as read_file:
+                data = js.load(read_file)
+                print(data)
+                if (data["configuration"][0]["username"]):
+                    print('Welcome')
+                    self.username = data ["configuration"][0]["username"]
+                    username_found = True
+                     
+                elif ("username" not in data):
+                    self.username = ""
+                    print("No user found")
+
+        except: 
+            print("error in config")
+        return username_found
+
+    # if no user in config saves username to config
+    def save_to_config(self,file):
+        js_obj ={"username":self.username}
+
+        try:
+            with open(file,"r+") as file:
+                data = js.load(file)
+                data['configuration'].append(js_obj)
+                file.seek(0)
+                js.dump(data,file,indent=4)
+        except FileNotFoundError:
+            print("config not found")
+
+
     #sanitizes input strings
     def sanitise_input(self,input):
         
