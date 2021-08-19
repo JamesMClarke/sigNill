@@ -29,6 +29,12 @@ class Client:
         
         #lets user define their username
         self.username = input("enter username:   ")
+        if(len(self.username)>10):
+            print("Username is limited to 10 characters")
+            self.username = input("enter username:   ")
+        self.username = self.sanitise_input(self.username)
+        print(self.username)
+
 
         self.menu()
        
@@ -36,7 +42,7 @@ class Client:
     def send_user_data(self):
         
         data = js.dumps({'username':self.username})
-        print(data)
+        #print(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
 
@@ -70,8 +76,14 @@ class Client:
     def send_mesg(self):
 
         target = input("Who do you want to message: " )
+        
         while True:
             mesg = input("type message:  ")
+            if(len(mesg)>50):
+                print("there is a 50 character limit on messages")
+                mesg = input("type message:  ")
+
+            self.sanitise_input(input)        
             time_sent = "  time sent:"+datetime.now().strftime("%H:%m")
             
             if(mesg ==":q"):
@@ -110,6 +122,7 @@ class Client:
         encrypted = True
         spinner = itertools.cycle(['-','/','|','\\'])
         while encrypted == False:
+            #shows loading spinner while message is being encrypted
             sys.stdout.write(next(spinner))
             sys.stdout.flush()
             sys.stdout.write('\b')
@@ -135,6 +148,18 @@ class Client:
             quit()
         else:
             print("Invalid command")
+
+    
+    #sanitizes input strings
+    def sanitise_input(self,input):
+        
+        s_list = ['?','.','!','/','#','$','%','<','>',':']
+        translation = input.maketrans({i:"" for i in s_list})
+        res_str = input.translate(translation)
+        
+        return res_str
+
+            
            
 if __name__ == "__main__":
     main()
