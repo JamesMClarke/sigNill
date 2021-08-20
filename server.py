@@ -7,7 +7,6 @@ import sys
 
 #TODO add kick client option
 #TODO add server status log
-#TODO Add response to the user if the person they are trying to message isn't connected
 #TODO Add some type of userinput sanitization
 
 class Server:
@@ -56,6 +55,9 @@ class Server:
                     data_to_send = js.dumps({"username":username,"message":message})
                     data = js.dumps(data)
                     target_ip.send(bytes(data_to_send,encoding='utf-8'))
+                else:
+                    data_to_send = js.dumps({"status":"User not connected"})
+                    c.send(bytes(data_to_send,encoding='utf-8'))
 
             # if no data connection lost client connection closed close
             if not data:

@@ -60,7 +60,6 @@ class Client:
 
         while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
-            print(data)
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
 
@@ -73,6 +72,8 @@ class Client:
                 #if message sent from sender print
                 if all(key in data for key in ("username","message")):
                     print(data["username"],": ",data['message'])
+                elif ("status" in data):
+                    print(data["status"])
 
                 if not data:
                     print('Cannot connect to server')
