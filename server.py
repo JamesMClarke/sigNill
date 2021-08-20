@@ -2,13 +2,13 @@ from datetime import datetime
 import json as js
 from os import error
 from users import Users
-import socket,errno
-import threading
-import sys
+import socket, errno,threading, sys, logging
 
 #TODO add kick client option
 #TODO add server status log
 #TODO Add some type of userinput sanitization
+
+logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
 class Server:
 
@@ -17,6 +17,7 @@ class Server:
     users = Users()
 
     def __init__(self):
+        logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
         #server run method is ran on separate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
@@ -33,22 +34,20 @@ class Server:
         while True:
             #loads data json object sent by client
             data = c.recv(self.buf_size)
-            print(data)
+            logging.debug("Server receive %s at %s"%(data, datetime.now().strftime("%H:%m")))
             if(data):
                 data = js.loads(data)
                             
                 #direct messaging if keys target and message in data retrieves target ip by searching for username
                 if ("target" in data):
                     target = str(data["target"])
-                    print(target)
-
+                    
                     #Server commands
                     if(target == "server"):
                         if(data['status'] == "connected"):
                             username = data["sender"]
                             self.users.add_user(username, c)
-                            print(a)
-                            print(username,str(a[0])+":"+str(a[1]),"connected")
+                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
                     else:
                     
@@ -66,7 +65,8 @@ class Server:
             # if no data connection lost client connection closed close
             else:
                 #displays disconnected client
-                print(str(username),"disconnected")
+                print("User '%s' disconnected at %s"%(username, datetime.now().strftime("%H:%m")))
+                logging.debug("User '%s' disconnected at %s"%(username, datetime.now().strftime("%H:%m")))
                 self.users.remove_by_name(username)
                 c.close()
                 break
@@ -80,6 +80,8 @@ class Server:
             if (i== "0"):
                 self.tcp_sock.close()
                 print("Server closed") 
+                logging.debug("Server stopped with command at %s"%(datetime.now().strftime("%H:%m")))
+                logging.shutdown()
                 sys.exit()
 
             #Lists all clients
@@ -111,13 +113,15 @@ class Server:
         try :
             self.tcp_sock.bind((tcp_ip,tcp_port))
         except socket.error as e:
+            logging.error("%s at %s"%(e,datetime.now().strftime("%H:%m")))
             if e.errno == errno.EADDRINUSE:
-                print("port "+ str(tcp_port)+" in use, using alternative port")
+                logging.debug("Port %s in use, using alternative port"%(str(tcp_port)))
+                print(("Port %s in use, using alternative port"%(str(tcp_port))))
                 tcp_port = 10080
                 self.tcp_sock.bind((tcp_ip,tcp_port))
 
         self.tcp_sock.listen(1)
-        print('server running')
+        print('Server running')
 
         while True:
             #accepts incoming connect requests 
