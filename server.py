@@ -5,7 +5,6 @@ from users import Users
 import socket, errno,threading, sys, logging
 
 #TODO add kick client option
-#TODO add server status log
 #TODO Add some type of userinput sanitization
 
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
