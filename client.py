@@ -1,3 +1,4 @@
+from os import stat
 from key import Key
 import json as js
 from datetime import datetime
@@ -62,18 +63,25 @@ class Client:
             data = self.tcp_sock.recv(self.buff_size)
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
-
-                # gets target might remove
-                if("target" in data):
-                    sender = data["target"]
-                    recv_message = data["message"]
-                    print(sender,": ",recv_message)
-
-                #if message sent from sender print
-                if all(key in data for key in ("username","message")):
-                    print(data["username"],": ",data['message'])
+                    
+                #If message sent from sender print
+                if ("message" in data):
+                    sender = data["sender"]
+                    
+                    #Sends received receipt
+                    time_sent =datetime.now().strftime("%H:%m")
+                    data = {
+                        'target':sender,
+                        'status':"Message received",
+                        'time_sent':str(time_sent),
+                        'sender': self.username
+                        }
+                    data = js.dumps(data)
+                    self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                    
                 elif ("status" in data):
-                    print(data["status"])
+                    if(data['status'] == "Message received"):
+                        print(str(data['sender'])+" received your message")
 
                 if not data:
                     print('Cannot connect to server')
@@ -85,6 +93,14 @@ class Client:
 
     #sends message to server based on username of recipent who is set as target
     def send_mesg(self):
+        #Sends message to the server to say it has connected
+        data = {
+            'status':"connected",
+            'sender':self.username
+        }
+        data = js.dumps(data)
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))
+
 
         target = input("Who do you want to message: " )
         
@@ -107,7 +123,8 @@ class Client:
                 data = {
                     'target':target,
                     'message':mesg,
-                    'time_sent':str(time_sent)
+                    'time_sent':str(time_sent),
+                    'sender':self.username
                     }
 
                 data = js.dumps(data)

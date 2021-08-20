@@ -1,3 +1,4 @@
+from datetime import datetime
 import json as js
 from os import error
 from users import Users
@@ -36,27 +37,25 @@ class Server:
             data = js.loads(data)
                 
             # if key username in data, adds connecting client username and ip address to users array
-            if("username" in data):
-                username = data["username"]
+            if("sender" in data):
+                username = data["sender"]
                 self.users.add_user(username, c)
                 print(a)
                 print(username,str(a[0])+":"+str(a[1]),"connected")
             
             #direct messaging if keys target and message in data retrieves target ip by searching for username
-            if all(key in data for key in ("target","message")):
+            if ("target" in data):
                 username_to_find = str(data["target"])
-                message = str(data["message"])
                 print(username_to_find)
                 target_ip = self.users.find_conn_by_name(username_to_find)
 
                 #if target_ip not null senders name and message is sent to recipent
                 if(target_ip != None):
                     #create json object with username of sender and message so that the recpent knows who sent the message
-                    data_to_send = js.dumps({"username":username,"message":message})
                     data = js.dumps(data)
-                    target_ip.send(bytes(data_to_send,encoding='utf-8'))
+                    target_ip.send(bytes(data,encoding='utf-8'))
                 else:
-                    data_to_send = js.dumps({"status":"User not connected"})
+                    data_to_send = js.dumps({"status":"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
                     c.send(bytes(data_to_send,encoding='utf-8'))
 
             # if no data connection lost client connection closed close
