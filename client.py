@@ -102,10 +102,13 @@ class Client:
         while self.mesg_loop:
             mesg = input("type message:  ")
             #char limit on message
-            #TODO Fix this, I think it can easily be tricked byt
-            if(len(mesg)>50):
-                print("There is a 50 character limit on messages")
-                mesg = input("Type message:  ")
+            valid = False
+            while not valid:
+                if(len(mesg)<50):
+                    valid = True
+                else:
+                    print("There is a 50 character limit on messages")
+                    mesg = input("Type message:  ")
             
             if(mesg ==":q"):
                 self.handler_loop = False
