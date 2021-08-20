@@ -1,14 +1,11 @@
-from os import stat
 from key import Key
 import json as js
 from datetime import datetime
-from time import sleep
 import itertools, sys, socket, threading
 
 #TODO if incoming message allow user to respond without having to declare who you want to send to -SC
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
-#TODO Add sometype of feedback to say the message has been received
 #TODO Add load username, text colour from config json
 #TODO Add choose text colour 
 
@@ -65,11 +62,11 @@ class Client:
             data = self.tcp_sock.recv(self.buff_size)
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
-                    
                 #If message sent from sender print
-                if ("message" in data):
+                if ('message' in data):
                     sender = data["sender"]
-                    
+                    print(sender,": ",data['message'])
+
                     #Sends received receipt
                     time_sent =datetime.now().strftime("%H:%m")
                     data = {
@@ -81,9 +78,12 @@ class Client:
                     data = js.dumps(data)
                     self.tcp_sock.send(bytes(data,encoding='utf-8'))
                     
-                elif ("status" in data):
+                    
+                elif ('status' in data):
                     if(data['status'] == "Message received"):
                         print(str(data['sender'])+" received your message")
+                    else:
+                        print(data['status'])
 
                 if not data:
                     print('Cannot connect to server')
