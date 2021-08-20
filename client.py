@@ -38,16 +38,18 @@ class Client:
             self.create_user()
             print(self.username)
 
-
+        self.connect_to_server()
         self.menu()
        
     #sends username to server to be added to server users list
     def send_user_data(self):
-        
-        data = js.dumps({'username':self.username})
-        #print(data)
+         #Sends message to the server to say it has connected
+        data = {
+            'status':"connected",
+            'sender':self.username
+        }
+        data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
-
 
     #handles data sent from the server
     def handler(self):
@@ -93,15 +95,6 @@ class Client:
 
     #sends message to server based on username of recipent who is set as target
     def send_mesg(self):
-        #Sends message to the server to say it has connected
-        data = {
-            'status':"connected",
-            'sender':self.username
-        }
-        data = js.dumps(data)
-        self.tcp_sock.send(bytes(data,encoding='utf-8'))
-
-
         target = input("Who do you want to message: " )
         
         self.mesg_loop = True
