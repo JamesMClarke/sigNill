@@ -42,6 +42,7 @@ class Client:
     def send_user_data(self):
          #Sends message to the server to say it has connected
         data = {
+            'target':"server",
             'status':"connected",
             'sender':self.username
         }
@@ -175,6 +176,18 @@ class Client:
             pass
         elif(cmd =="0"):
             try:
+                time_sent =datetime.now().strftime("%H:%m")
+
+                data = {
+                    'target':"server",
+                    'status':'disconnecting',
+                    'time_sent':str(time_sent),
+                    'sender':self.username
+                    }
+
+                data = js.dumps(data)
+                self.tcp_sock.send(bytes(data,encoding='utf-8'))
+
                 self.tcp_sock.shutdown(0)
                 self.tcp_sock.close()
             except OSError:

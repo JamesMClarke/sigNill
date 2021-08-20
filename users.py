@@ -38,5 +38,13 @@ class Users:
     def get_no_of_users(self):
         return len(self.users)
     
+    def remove_by_name(self, username):
+        for i in range(-1, len(self.users)-1):
+            if(username == self.users[i].get_username()):
+                print("Removing user at"+str(i))
+                del self.users[i]
+            else:
+                return "no user"
+    
 
 

@@ -34,35 +34,40 @@ class Server:
             #loads data json object sent by client
             data = c.recv(self.buf_size)
             print(data)
-            data = js.loads(data)
-                
-            # if key username in data, adds connecting client username and ip address to users array
-            if("sender" in data):
-                username = data["sender"]
-                self.users.add_user(username, c)
-                print(a)
-                print(username,str(a[0])+":"+str(a[1]),"connected")
-            
-            #direct messaging if keys target and message in data retrieves target ip by searching for username
-            if ("target" in data):
-                username_to_find = str(data["target"])
-                print(username_to_find)
-                target_ip = self.users.find_conn_by_name(username_to_find)
+            if(data):
+                data = js.loads(data)
+                            
+                #direct messaging if keys target and message in data retrieves target ip by searching for username
+                if ("target" in data):
+                    target = str(data["target"])
+                    print(target)
 
-                #if target_ip not null senders name and message is sent to recipent
-                if(target_ip != None):
-                    #create json object with username of sender and message so that the recpent knows who sent the message
-                    data = js.dumps(data)
-                    target_ip.send(bytes(data,encoding='utf-8'))
-                else:
-                    data_to_send = js.dumps({"status":"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
-                    c.send(bytes(data_to_send,encoding='utf-8'))
+                    #Server commands
+                    if(target == "server"):
+                        if(data['status'] == "connected"):
+                            username = data["sender"]
+                            self.users.add_user(username, c)
+                            print(a)
+                            print(username,str(a[0])+":"+str(a[1]),"connected")
+
+                    else:
+                    
+                        target_ip = self.users.find_conn_by_name(target)
+
+                        #if target_ip not null senders name and message is sent to recipent
+                        if(target_ip != None):
+                            #create json object with username of sender and message so that the recpent knows who sent the message
+                            data = js.dumps(data)
+                            target_ip.send(bytes(data,encoding='utf-8'))
+                        else:
+                            data_to_send = js.dumps({"status":"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
+                            c.send(bytes(data_to_send,encoding='utf-8'))
 
             # if no data connection lost client connection closed close
-            if not data:
+            else:
                 #displays disconnected client
                 print(str(username),"disconnected")
-                self.connections.remove(c)
+                self.users.remove_by_name(username)
                 c.close()
                 break
     #server menu
@@ -84,7 +89,6 @@ class Server:
                 #If there are currently clients connected, then prints name and connection
                 if(no_of_users > 0):
                     info = self.users.get_all()
-                    print(info)
                     for i in info:
                         print("User: "+str(i[0]))
                         print("Conn: "+str(i[1]))
@@ -125,13 +129,6 @@ class Server:
             handler_thread.start() 
             
         
-
-
-        
-
-
-
-
 server = Server()
 
 
