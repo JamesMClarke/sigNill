@@ -44,6 +44,9 @@ class Server:
                     #Server commands
                     if(target == "server"):
                         if(data['status'] == "connected"):
+                            #TODO Move this back to where it was above outside of the 2 if's
+                            #This is due to the fact the user could be connected but no have the server see as such
+                            #However, before adding the user to the list, it needs to be checked that a user does not already have the same name
                             username = data["sender"]
                             self.users.add_user(username, c)
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
@@ -77,6 +80,23 @@ class Server:
 
             #Closes connections and exits server 
             if (i== "0"):
+                data = {
+                    'sender':"server",
+                    'status':"shutting down"
+                }
+                #TODO Change this to get_all_conn
+                users = self.users.get_all()
+
+                for u in users:
+                    target_ip = u[1]
+
+                    #if target_ip not null senders name and message is sent to recipent
+                    if(target_ip != None):
+                        #create json object with username of sender and message so that the recpent knows who sent the message
+                        print("Sending shutdown to %s"%(target_ip))
+                        data = js.dumps(data)
+                        target_ip.send(bytes(data,encoding='utf-8'))
+
                 self.tcp_sock.close()
                 print("Server closed") 
                 logging.debug("Server stopped with command at %s"%(datetime.now().strftime("%H:%m")))

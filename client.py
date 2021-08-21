@@ -27,8 +27,6 @@ class Client:
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
 
-
-
         if(self.load_user_config(config_file) and branch != "dev"):
             print(self.username)
         else:
@@ -51,12 +49,6 @@ class Client:
 
     #handles data sent from the server
     def handler(self):
-
-        #starts message input on seperate thread
-        self.input_thread = threading.Thread(target=self.send_mesg)                        
-        self.input_thread.daemon = True
-        self.input_thread.start()
-
         self.handler_loop = True
 
         while self.handler_loop:    
@@ -83,6 +75,19 @@ class Client:
                 elif ('status' in data):
                     if(data['status'] == "Message received"):
                         print(str(data['sender'])+" received your message")
+                    elif(data['status'] == "shutting down" and data['sender'] == "server"):
+                        try:
+                            #TODO Find a better thing to do than closing client
+                            #Possibly setting handler_loop to false
+                            #TODO Find a way for this to work without the server saying anything
+                            #This is incase the server crashes and doesn't get the chance to say anything
+                            print("Server has shutdown closing client")
+                            self.tcp_sock.shutdown(0)
+                            self.tcp_sock.close()
+                        except OSError:
+                            pass
+                        sys.exit("Client closing")
+                        quit()
                     else:
                         print(data['status'])
 
@@ -163,15 +168,15 @@ class Client:
     
     #user menu dislayed at start up
     def menu(self):
+        self.handler_thread = threading.Thread(target = self.handler)
+        self.handler_thread.daemon = True
+        self.handler_thread.start()
         print("commands:\n1: start chat\n2: edit username\n0: exit")
         cmd = input("enter command: ")
         if(cmd =="1"):
-            try:
-                self.connect_to_server()
-            except OSError:
-                pass
-            self.handler()
-
+            #starts message input on seperate thread
+            self.send_mesg()
+         
         elif(cmd == "2"):
             #TODO Fully impellent changing username
             #If this is changed after the user has already connected to the server it will need to be changed there as well
