@@ -1,7 +1,7 @@
 from key import Key
 import json as js
 from datetime import datetime
-import itertools, sys, socket, threading
+import itertools, sys, socket, threading, re
 
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
@@ -252,13 +252,9 @@ class Client:
 
     #sanitizes input strings
     def sanitise_input(self,input):
-        #TODO Change sanitization to whitelist
-        #array of characters to be removed from string
-        s_list = ['?','.','!','/','#','$','%','<','>',':']
-        translation = input.maketrans({i:"" for i in s_list})
-        res_str = input.translate(translation)
-        
+        res_str = re.sub(r'[#;></\\|~{}¬`]', '', input)
         return res_str
+
 
             
            
