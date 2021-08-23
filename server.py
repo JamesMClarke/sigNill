@@ -4,10 +4,9 @@ from os import error
 from users import Users
 import socket, errno,threading, sys, logging
 
-#TODO add kick client option
 #TODO Add some type of userinput sanitization
 
-logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+#logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
 class Server:
 
@@ -16,7 +15,7 @@ class Server:
     users = Users()
 
     def __init__(self):
-        logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
+        #logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
         #server run method is ran on separate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
@@ -43,8 +42,13 @@ class Server:
                     #Server commands
                     if(target == "server"):
                         if(data['status'] == "connected"):
+                            #TODO save username salt and password to server json file
+                            #TODO add compare function for already existing user
                             #TODO Check if a user is already connected with that account name
                             username = data["sender"]
+                            __password = data["password"]
+                            __salt = data["salt"] 
+                            print("salt and pwd: ",__salt,__password)
                             self.users.add_user(username, c)
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
@@ -140,6 +144,7 @@ class Server:
 
             else:
                 print("Please enter a valid command")
+    
 
     #initializes server
     def run(self):
@@ -147,7 +152,7 @@ class Server:
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-        self.buf_size = 128
+        self.buf_size = 256
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used

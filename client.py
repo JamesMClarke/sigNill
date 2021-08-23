@@ -5,9 +5,10 @@ import itertools, sys, socket, threading, re, bcrypt, getpass
 
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
-#TODO Add load username, text colour from config json
+#TODO Add text colour from config json
 #TODO Add choose text colour 
-#TODO add password verification 
+#TODO Add password verification 
+#TODO Add store freinds to config.json
 
 config_file = 'data/config.json'
 branch = "dev"
@@ -38,11 +39,14 @@ class Client:
        
     #sends username to server to be added to server users list
     def send_user_data(self):
-         #Sends message to the server to say it has connected
+        #TODO add hashed password and salt to send 
+        #Sends message to the server to say it has connected
         data = {
             'target':"server",
             'status':"connected",
-            'sender':self.username
+            'sender':self.username,
+            'password':str(self.hashed_password),
+            'salt':str(self.salt)
         }
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
@@ -273,8 +277,8 @@ class Client:
     #add loading indicator
     def hash_pwd(self,password):        
         password.encode("utf-8")
-        salt = bcrypt.gensalt(rounds=16)
-        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(salt))
+        self.salt = bcrypt.gensalt(rounds=16)
+        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.salt))
         
         return hashed_pwd
   
