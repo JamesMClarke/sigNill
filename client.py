@@ -9,6 +9,8 @@ import itertools, sys, socket, threading, re, bcrypt, getpass
 #TODO Add choose text colour 
 #TODO Add password verification 
 #TODO Add store freinds to config.json
+#TODO  if a username already exists do not create a new one
+#TODO add create data folder and config.json file
 
 config_file = 'data/config.json'
 branch = "dev"
