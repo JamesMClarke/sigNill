@@ -29,7 +29,6 @@ class Server:
     def handler(self,c,a):
 
         username = ""
-        message = ""
         while True:
             #loads data json object sent by client
             data = c.recv(self.buf_size)
@@ -44,9 +43,7 @@ class Server:
                     #Server commands
                     if(target == "server"):
                         if(data['status'] == "connected"):
-                            #TODO Move this back to where it was above outside of the 2 if's
-                            #This is due to the fact the user could be connected but no have the server see as such
-                            #However, before adding the user to the list, it needs to be checked that a user does not already have the same name
+                            #TODO Check if a user is already connected with that account name
                             username = data["sender"]
                             self.users.add_user(username, c)
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
@@ -72,24 +69,41 @@ class Server:
                 self.users.remove_by_name(username)
                 c.close()
                 break
+
+    def kick(self, username):
+        conn = self.users.find_conn_by_name(username)
+        if(conn != None):
+            #Sends data to tell users they have been kicked
+            data = {
+                'sender':"server",
+                'status':"kicked"
+            }
+            data = js.dumps(data)
+            conn.send(bytes(data,encoding='utf-8'))
+
+            #Removes user from list of users
+            self.users.remove_by_name(username)
+            return True
+        else:
+            return False
+
     #server menu
     def menu(self):
         while True:
-            print("\nCommands: \n1: List all clients\n0: Exit") 
+            print("\nCommands: \n1: List all clients\n2: Kick Client\n0: Exit") 
             i = input()
 
             #Closes connections and exits server 
             if (i== "0"):
+                #This techincally doesn't currently need to be here
+                #But I left it just incase we use it later
                 data = {
                     'sender':"server",
                     'status':"shutting down"
                 }
-                #TODO Change this to get_all_conn
-                users = self.users.get_all()
+                conns = self.users.get_all_conn()
 
-                for u in users:
-                    target_ip = u[1]
-
+                for target_ip in conns:
                     #if target_ip not null senders name and message is sent to recipent
                     if(target_ip != None):
                         #create json object with username of sender and message so that the recpent knows who sent the message
@@ -115,6 +129,14 @@ class Server:
                         print("Conn: "+str(i[1]))
                 else:
                     print("There are currently no clients connected")
+            
+            #Kick client
+            elif(i == "2"):
+                username = input("Please enter the username of client you wish to kick:")
+                if(self.kick(username)):
+                    print("%s has been kicked"%(username))
+                else:
+                    print("%s is not currently connected"%(username))
 
             else:
                 print("Please enter a valid command")

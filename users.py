@@ -34,6 +34,12 @@ class Users:
             info.append([u.get_username(), u.get_connection()])
         return info
 
+    def get_all_conn(self):
+        conns = []
+        for c in self.users:
+            conns.append(c.get_connection())
+        return conns
+
     #Returns the number of uses
     def get_no_of_users(self):
         return len(self.users)

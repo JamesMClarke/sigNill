@@ -76,6 +76,14 @@ class Client:
                 elif ('status' in data):
                     if(data['status'] == "Message received"):
                         print(str(data['sender'])+" received your message")
+                    if(data['sender'] == "server" and data['status'] == 'kicked'):
+                        print("You have been kicked")
+                        self.handler_loop = False
+                        self.tcp_sock.shutdown(0)
+                        self.tcp_sock.close()
+                        self.mesg_loop = False
+                        sys.exit("Client closing")
+                        quit()
                     else:
                         print(data['status'])
                 
