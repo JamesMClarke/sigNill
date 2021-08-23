@@ -2,9 +2,8 @@ from datetime import datetime
 import json as js
 from os import error
 from users import Users
+from tools import reg_input
 import socket, errno,threading, sys, logging
-
-#TODO Add some type of userinput sanitization
 
 #logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
@@ -95,7 +94,7 @@ class Server:
     def menu(self):
         while True:
             print("\nCommands: \n1: List all clients\n2: Kick Client\n0: Exit") 
-            i = input()
+            i = reg_input("",int)
 
             #Closes connections and exits server 
             if (i== "0"):
@@ -136,7 +135,7 @@ class Server:
             
             #Kick client
             elif(i == "2"):
-                username = input("Please enter the username of client you wish to kick:")
+                username = reg_input("Please enter the username of client you wish to kick:",str)
                 if(self.kick(username)):
                     print("%s has been kicked"%(username))
                 else:

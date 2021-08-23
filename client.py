@@ -1,7 +1,8 @@
 from key import Key
 import json as js
 from datetime import datetime
-import itertools, sys, socket, threading, re, bcrypt, getpass
+from tools import reg_input
+import itertools, sys, socket, threading, bcrypt, getpass
 
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
@@ -111,11 +112,11 @@ class Client:
 
     #sends message to server based on username of recipent who is set as target
     def send_mesg(self):
-        target = input("Who do you want to message: " )
+        target = reg_input("Who do you want to message: ", str)
         
         self.mesg_loop = True
         while self.mesg_loop:
-            mesg = input("type message:  ")
+            mesg = reg_input("type message:  ", str)
             #char limit on message
             valid = False
             while not valid:
@@ -123,7 +124,7 @@ class Client:
                     valid = True
                 else:
                     print("There is a 50 character limit on messages")
-                    mesg = input("Type message:  ")
+                    mesg = reg_input("Type message:  ", str)
             
             if(mesg ==":q"):
                 self.handler_loop = False
@@ -182,7 +183,7 @@ class Client:
         self.handler_thread.daemon = True
         self.handler_thread.start()
         print("commands:\n1: start chat\n2: edit username\n0: exit")
-        cmd = input("enter command: ")
+        cmd = reg_input("enter command: ", int)
         if(cmd =="1"):
             #starts message input on seperate thread
             self.send_mesg()
@@ -190,7 +191,7 @@ class Client:
         elif(cmd == "2"):
             #TODO Fully impellent changing username
             #If this is changed after the user has already connected to the server it will need to be changed there as well
-            self.username = input("enter username:   ")
+            self.username = reg_input("enter username:   ", str)
             pass
         elif(cmd =="0"):
             try:
@@ -219,19 +220,18 @@ class Client:
     def create_user(self):
 
         #lets user define their username
-        self.username = input("enter username:   ")
+        self.username = reg_input("enter username:   ", str)
         __password = getpass.getpass("enter password:   ")
 
+        #TODO Fix this it can be easily tricked
         if(len(self.username)>10):
             print("Username is limited to 10 characters")
-            self.username = input("enter username:   ")
+            self.username = reg_input("enter username:   ", str)
         #prevents blank username
         if(self.username ==""):
             self.create_user()
-
-        self.username = self.sanitise_input(self.username)
         
-        self.hashed_password = (self.hash_pwd(self.sanitise_input(__password)))
+        self.hashed_password = (self.hash_pwd(__password))
         print(self.hashed_password)
         self.save_to_config(config_file)
 
@@ -270,12 +270,6 @@ class Client:
         except FileNotFoundError:
             print("config not found")
 
-
-    #sanitizes input strings
-    def sanitise_input(self,input):
-        res_str = re.sub(r'[#;></\\|~{}¬`]', '', input)
-        
-        return res_str
     
     #add loading indicator
     def hash_pwd(self,password):        
