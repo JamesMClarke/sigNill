@@ -1,12 +1,13 @@
 from key import Key
 import json as js
 from datetime import datetime
-import itertools, sys, socket, threading, re
+import itertools, sys, socket, threading, re, bcrypt, getpass
 
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
 #TODO Add load username, text colour from config json
 #TODO Add choose text colour 
+#TODO add password verification 
 
 config_file = 'data/config.json'
 branch = "dev"
@@ -213,6 +214,8 @@ class Client:
 
         #lets user define their username
         self.username = input("enter username:   ")
+        __password = getpass.getpass("enter password:   ")
+
         if(len(self.username)>10):
             print("Username is limited to 10 characters")
             self.username = input("enter username:   ")
@@ -221,6 +224,9 @@ class Client:
             self.create_user()
 
         self.username = self.sanitise_input(self.username)
+        
+        self.hashed_password = (self.hash_pwd(self.sanitise_input(__password)))
+        print(self.hashed_password)
         self.save_to_config(config_file)
 
      
@@ -261,10 +267,17 @@ class Client:
     #sanitizes input strings
     def sanitise_input(self,input):
         res_str = re.sub(r'[#;></\\|~{}¬`]', '', input)
+        
         return res_str
-
-
-            
+    
+    #add loading indicator
+    def hash_pwd(self,password):        
+        password.encode("utf-8")
+        salt = bcrypt.gensalt(rounds=16)
+        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(salt))
+        
+        return hashed_pwd
+  
            
 if __name__ == "__main__":
     main()
