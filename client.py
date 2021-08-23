@@ -240,15 +240,16 @@ class Client:
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
-                print(data)
-                if (data["configuration"][0]["username"]):
-                    print('Welcome')
-                    self.username = data ["configuration"][0]["username"]
-                    username_found = True
-                     
-                elif ("username" not in data):
-                    self.username = ""
-                    print("No user found")
+                data = data['configuration']
+                for i in data:
+                    if (i["username"]):
+                        print('Welcome',i["username"])
+                        self.username = i["username"]
+                        username_found = True
+                        
+                    elif (i["username"] not in data):
+                        self.username = ""
+                        print("No user found")
 
         except: 
             print("error in config")
