@@ -3,7 +3,6 @@ import json as js
 from datetime import datetime
 import itertools, sys, socket, threading
 
-#TODO if incoming message allow user to respond without having to declare who you want to send to -SC
 #TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
 #TODO Add load username, text colour from config json
@@ -53,6 +52,8 @@ class Client:
 
         while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
+            print(data)
+            print(len(data))
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
                 #If message sent from sender print
@@ -75,27 +76,21 @@ class Client:
                 elif ('status' in data):
                     if(data['status'] == "Message received"):
                         print(str(data['sender'])+" received your message")
-                    elif(data['status'] == "shutting down" and data['sender'] == "server"):
-                        try:
-                            #TODO Find a better thing to do than closing client
-                            #Possibly setting handler_loop to false
-                            #TODO Find a way for this to work without the server saying anything
-                            #This is incase the server crashes and doesn't get the chance to say anything
-                            print("Server has shutdown closing client")
-                            self.tcp_sock.shutdown(0)
-                            self.tcp_sock.close()
-                        except OSError:
-                            pass
-                        sys.exit("Client closing")
-                        quit()
                     else:
                         print(data['status'])
-
+                
                 if not data:
                     print('Cannot connect to server')
                     break
             else:
+                #TODO Make it handle this better than just closing the program
+                print("Server has shutdown closing client")
                 self.handler_loop = False
+                self.tcp_sock.shutdown(0)
+                self.tcp_sock.close()
+                self.mesg_loop = False
+                sys.exit("Client closing")
+                quit()
         
         self.menu()
 
