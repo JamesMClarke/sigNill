@@ -1,3 +1,0 @@
-DEBUG:root:Server started at 23:08
-ERROR:root:[Errno 98] Address already in use at 23:08
-DEBUG:root:Port 8080 in use, using alternative port

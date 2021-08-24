@@ -1,7 +1,0 @@
-DEBUG:root:Server started at 00:08
-DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 00:08
-DEBUG:root:User 'Bob', '127.0.0.1' , '55764' connected at 00:08
-DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 00:08
-DEBUG:root:User 'Alice', '127.0.0.1' , '55766' connected at 00:08
-DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Alice", "p": "92812818085711306317803668009301350647171668785651106478154637880362496091559", "g": "93820321332875006763052112008934693163425752374566603834815501260375907098271"}' at 00:08
-DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Alice", "key": 26261129827751399567869196787519313081673391681893707866808480621918963857865}' at 00:08
