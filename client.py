@@ -31,10 +31,11 @@ class Client:
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
 
-        if(self.load_user_config(config_file) and branch != "dev"):
+        self.load_user_config(config_file)
+        if((self.username == "") and(branch !="dev")):
+            self.create_user()
             print(self.username)
         else:
-            self.create_user()
             print(self.username)
 
         self.connect_to_server()
@@ -237,25 +238,21 @@ class Client:
 
      
     #loads user config infomation, if username not found in config returns null and runs create user
-    def load_user_config(self,file):
-        username_found = False
+   def load_user_config(self,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data['configuration']
                 for i in data:
                     if (i["username"]):
-                        print('Welcome',i["username"])
-                        self.username = i["username"]
-                        username_found = True
-                        
+                        self.username = i["username"]               
                     elif (i["username"] not in data):
                         self.username = ""
                         print("No user found")
 
+                return self.username
         except: 
             print("error in config")
-        return username_found
 
     # if no user in config saves username to config
     def save_to_config(self,file):
