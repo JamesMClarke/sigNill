@@ -46,7 +46,6 @@ class Client:
             'target':"server",
             'status':"connected",
             'sender':self.username,
-            'password':str(self.hashed_password),
             'salt':str(self.salt)
         }
         data = js.dumps(data)
@@ -92,7 +91,12 @@ class Client:
                         quit()
                     else:
                         print(data['status'])
-                
+
+                    #receives salt from server
+                    if((data['sender'] == "server") and (data['data'])):
+                        print("here is where the hwd comapre will run", data['sender'], data['data'])
+
+
                 if not data:
                     print('Cannot connect to server')
                     break
@@ -220,17 +224,24 @@ class Client:
         #lets user define their username
         self.username = reg_input("enter username:   ", str)
         __password = getpass.getpass("enter password:   ")
+        __password2 = getpass.getpass("renter password: ")
+
+        #reruns create user if pwd do not match
+        if(__password != __password2):
+            print("passwords do not match")
+            self.create_user()
 
         #TODO Fix this it can be easily tricked
         if(len(self.username)>10):
             print("Username is limited to 10 characters")
             self.username = reg_input("enter username:   ", str)
+        
         #prevents blank username
         if(self.username ==""):
             self.create_user()
-        
+        #passes password to be hashed
         self.hashed_password = (self.hash_pwd(__password))
-        print(self.hashed_password)
+
         #dosent save to config if dev
         if(branch != "dev"):
             self.save_to_config(config_file)
@@ -274,7 +285,19 @@ class Client:
         hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.salt))
         
         return hashed_pwd
-  
+
+    def compare_pwd(self,__salt,__hashed_pwd,__password):
+            __allow_user_login = False
+            __password = bcrypt.hashpw(__password.encode("utf-8"),bytes(__salt))
+            
+            if(__hashed_pwd == __hashed_pwd):
+                print("password matches")
+                __allow_user_login = True
+
+            return __allow_user_login
+
+
+
            
 if __name__ == "__main__":
     main()

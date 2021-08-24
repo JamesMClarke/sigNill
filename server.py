@@ -3,7 +3,7 @@ import json as js
 from os import error
 from users import Users
 from tools import reg_input
-import socket, errno,threading, sys, logging
+import socket, errno,threading, sys, logging,bcrypt
 
 logging.basicConfig(filename="data/logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
@@ -45,9 +45,16 @@ class Server:
                             #TODO add compare function for already existing user
                             #TODO Check if a user is already connected with that account name
                             username = data["sender"]
-                            __password = data["password"]
                             __salt = data["salt"] 
-                            print("salt and pwd: ",__salt,__password)
+
+                            #passes username to load_user
+                            if(self.load_user(username) is None):
+                                print("no user")
+                                self.add_user(username,__salt)
+                            else:
+                                data_to_send = js.dumps({'sender':"server","data":str(__salt)})
+                                c.send(bytes(data_to_send,encoding='utf-8'))
+
                             self.users.add_user(username, c)
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
@@ -143,8 +150,35 @@ class Server:
 
             else:
                 print("Please enter a valid command")
+    #loads registered users and checks if user is already in server
     
+    def load_user(self,username):
+        file = "data/reg_users.json"
 
+        try: 
+            with open (file,"r") as read_file:
+                data = js.load(read_file)
+                data = data['registered_users']
+                #if username equals i["username"] loads salt and hash comapres salt and hash 
+                for i in data:
+                    if (i["username"] == username):
+                        __salt = i["salt"]
+                        print(i["username"],i["salt"])
+                        return __salt
+
+                    elif (i["username"] != username):
+                        print("No user found\n registering user")
+                        return 
+        except FileNotFoundError: 
+            print("error no reg_user.json file found: "+str(FileNotFoundError))
+        
+        pass
+
+
+    def add_user(self):
+        pass
+
+   
     #initializes server
     def run(self):
 
