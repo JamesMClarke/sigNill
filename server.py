@@ -5,7 +5,7 @@ from users import Users
 from tools import reg_input
 import socket, errno,threading, sys, logging
 
-#logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+logging.basicConfig(filename="data/logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
 class Server:
 
@@ -14,7 +14,7 @@ class Server:
     users = Users()
 
     def __init__(self):
-        #logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
+        logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
         #server run method is ran on separate thread 
         run_thread = threading.Thread(target=self.run)
         run_thread.daemon = True
