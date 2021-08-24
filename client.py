@@ -30,14 +30,11 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
+        
+        if((self.username == "") and (branch !="dev")):
+            self.load_user_config(config_file)
 
-        self.load_user_config(config_file)
-        if((self.username == "") and(branch !="dev")):
-            self.create_user()
-            print(self.username)
-        else:
-            print(self.username)
-
+        self.create_user()
         self.connect_to_server()
         self.menu()
        
@@ -234,11 +231,13 @@ class Client:
         
         self.hashed_password = (self.hash_pwd(__password))
         print(self.hashed_password)
-        self.save_to_config(config_file)
+        #dosent save to config if dev
+        if(branch != "dev"):
+            self.save_to_config(config_file)
 
      
     #loads user config infomation, if username not found in config returns null and runs create user
-   def load_user_config(self,file):
+    def load_user_config(self,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
