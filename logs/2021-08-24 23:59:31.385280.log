@@ -1,0 +1,9 @@
+DEBUG:root:Server started at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '55732' connected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 23:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '55734' connected at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "p": "\\"74535026310560890434548791223929714465927403068995894965373407125547128695623\\"", "g": "\\"106468590476284448520172977176801272246356745409803465511292890766320525619863\\""}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "key": 21575025245323103495378898133619642476668891154917153518428155056426314090734}' at 23:08
+DEBUG:root:Server receive b'' at 00:08
+DEBUG:root:User 'Alice' disconnected at 00:08

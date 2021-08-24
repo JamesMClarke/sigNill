@@ -1,0 +1,10 @@
+DEBUG:root:Server started at 23:08
+ERROR:root:[Errno 98] Address already in use at 23:08
+DEBUG:root:Port 8080 in use, using alternative port
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '59976' connected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 23:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '59984' connected at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "p": 104013193925878536400562097559064972234677140296270022731449309569272724839419, "g": 87326538547888104912196037404527065515061108257351141298060021568694414625867}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "key": 3155848203611530343345148100388018655311356707077733978311898931887625613055}' at 23:08
+DEBUG:root:Server stopped with command at 23:08

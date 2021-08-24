@@ -12,15 +12,18 @@ class Key:
     _private: int
     _public: int
     _shared: int
+    _user: str
 
     def __init__(self, *args):
         #If P and G are already set, then set them
-        if len(args) != 0:
-            self._P = args[0]
-            self._G = args[1]
+        if len(args) != 1:
+            self._user = args[0]
+            self._P = args[1]
+            self._G = args[2]
             self.generate_private_key()
         #Else create them
         else:
+            self._user = args[0]
             self._P = number.getPrime(self._key_bits)
             self._G = number.getPrime(self._key_bits)
             self.generate_private_key()
@@ -36,6 +39,7 @@ class Key:
 
     #Generates the shared private key
     def generate_shared(self, public2):
+        #TODO make base 64 for easier sending
         #self.shared = (public2**self.private)%self.P
         self._shared = pow(public2, self._private, self._P)
 
@@ -45,8 +49,12 @@ class Key:
     def get_G(self):
         return self._G
 
+    def get_P_G(self):
+        return self._P, self._G
+
     def get_shared(self):
         return self._shared
+    
 
     #Encrypts the messages using AES and returns it in base 64
     def encrypt(self, plaintext):
@@ -63,13 +71,27 @@ class Key:
         plaintext = cipher.decrypt(ciphertext)
         return plaintext
 
+    def get_user(self):
+        return self._user
+    
+    def set_user(self, user):
+        self._user = user
+
+    def shared_set(self):
+        try:
+            self.get_shared()
+            return True
+        except AttributeError:
+            return False
+
 """
 #Example set-up
 start = time()
-Alice = Key()
+Alice = Key("Bob")
+Alice.shared_set()
 P = Alice.get_P()
 G = Alice.get_G()
-Bob = Key(P,G)
+Bob = Key("Alice",P,G)
 print(Bob.get_P(), Bob.get_G())
 print("Gen public")
 print(time()-start)
@@ -87,4 +109,3 @@ print(message)
 print(Bob.decrypt(message, nonce))
 print(time()-start)
 """
-

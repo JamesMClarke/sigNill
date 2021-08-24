@@ -1,0 +1,30 @@
+DEBUG:root:Server started at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "James"}' at 23:08
+DEBUG:root:User 'James', '127.0.0.1' , '55062' connected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "disconnecting", "time_sent": "23:08", "sender": "James"}' at 23:08
+DEBUG:root:Server receive b'' at 23:08
+DEBUG:root:User 'James' disconnected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '55516' connected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 23:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '55522' connected at 23:08
+DEBUG:root:Server receive b'' at 23:08
+DEBUG:root:User 'Alice' disconnected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '55530' connected at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "p": 94238981017031804185978559404288936618872779698741373711838017123562454697953, "g": 80881181317878015245741295882903836575485561739543969075383271067347234906093}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "key": 53921500332653135701455690683342940439405899913217952118091936326931275493610}' at 23:08
+DEBUG:root:Server receive b'' at 23:08
+DEBUG:root:User 'Alice' disconnected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '55540' connected at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "p": 69439125301365247789342103371668383499874591478366670123852901086722999007827, "g": 94081474837263948803170192166297458623619279279993350891206971127540929495169}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "key": 3348808183572439363643860934226644339588144674098581074604711617639194958918}' at 23:08
+DEBUG:root:Server receive b'' at 23:08
+DEBUG:root:User 'Alice' disconnected at 23:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 23:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '55550' connected at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "p": 106510709676992043123532584691257372358783626093910024763934743202811957469869, "g": 64967808067204237576540547826761368272292639363140679221805741774127796564811}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "23:08", "sender": "Alice", "key": 1354246379076643528467661697706308915420343927254513552478611761070764125653}' at 23:08
+DEBUG:root:Server receive b'{"target": "Bob", "message": "test", "time_sent": "23:08", "sender": "Alice"}' at 23:08
+DEBUG:root:Server stopped with command at 23:08

@@ -1,16 +1,18 @@
+from time import gmtime, sleep
 from key import Key
 import json as js
 from datetime import datetime
 from tools import reg_input
+from keys import Keys
+from key import Key
 import itertools, sys, socket, threading, bcrypt, getpass
 
-#TODO add encrypt message
 #TODO Store shared key after it has been generated maybe
 #TODO Add text colour from config json
 #TODO Add choose text colour 
 #TODO Add password verification 
 #TODO Add store freinds to config.json
-#TODO  if a username already exists do not create a new one
+#TODO if a username already exists do not create a new one
 #TODO add create data folder and config.json file
 
 config_file = 'data/config.json'
@@ -24,6 +26,7 @@ class Client:
     #creates socket 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     username = ""
+    keys = Keys()
 
     def __init__(self):
         #initializes connection variables
@@ -54,13 +57,37 @@ class Client:
     #handles data sent from the server
     def handler(self):
         self.handler_loop = True
-
+        
         while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
             print(data)
             print(len(data))
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
+                #If P and G are in the message
+                if ('p' in data):
+                    #Check if a user with that name is already in keys
+                    if(self.keys.find_key_by_name(data['sender']) == None):
+                        #If not create a new key
+                        key = Key(data['sender'], int(data['p']), int(data['g']))
+                        self.keys.add_key(key)
+                        print("Keys: "+str(self.keys))
+                        #Generate and send public key
+                        data = {
+                            'target':data['sender'],
+                            'time_sent':str(datetime.now().strftime("%H:%m")),
+                            'sender':self.username,
+                            'key': key.generate_public_key()
+                            }
+                        data = js.dumps(data)
+                        self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                elif('key' in data):
+                    #Generate shaired key
+                    key = self.keys.find_key_by_name(data['sender'])
+                    if(not key.shared_set()):
+                        key.generate_shared(data['key'])
+                        
+                
                 #If message sent from sender print
                 if ('message' in data):
                     sender = data["sender"]
@@ -112,13 +139,46 @@ class Client:
         
         self.menu()
 
-    #sends message to server based on username of recipent who is set as target
+    #sends message to server based on username of recipient who is set as target
     def send_mesg(self):
         target = reg_input("Who do you want to message: ", str)
-        
+        #TODO Add encryption
+        #Check if user is the one starting the conversation
+        #TODO The client should probably check the user is a person on the server before key gen
+        if(self.keys.find_key_by_name(target) == None):
+            #If they are generate and send P and G to other user
+            key = Key(target)
+            self.keys.add_key(key)
+            P, G = key.get_P_G()
+            #Send P and G
+            data = {
+                    'target':target,
+                    'time_sent':str(datetime.now().strftime("%H:%m")),
+                    'sender':self.username,
+                    'p': str(P),
+                    'g': str(G)
+                    }
+            data = js.dumps(data)
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+            #TODO Add check that they have received p and g
+            #Generate public key and send public key
+            data = {
+                'target':target,
+                'time_sent':str(datetime.now().strftime("%H:%m")),
+                'sender':self.username,
+                'key': key.generate_public_key()
+                }
+            data = js.dumps(data)
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+            #Wait for shaired key to be generated
+            while(not key.shared_set):
+                sleep(1)
+            #When you have received their shaired key generate shared key
+            #Send encrypted message and nonce 
         self.mesg_loop = True
         while self.mesg_loop:
             mesg = reg_input("type message:  ", str)
+            #TODO Encrypt message with key
             #char limit on message
             valid = False
             while not valid:
@@ -131,8 +191,7 @@ class Client:
             if(mesg ==":q"):
                 self.handler_loop = False
                 self.mesg_loop = False
-            else:
-                mesg = self.sanitise_input(mesg)        
+            else:   
                 time_sent =datetime.now().strftime("%H:%m")
 
                 data = {

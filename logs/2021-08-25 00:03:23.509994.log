@@ -1,0 +1,28 @@
+DEBUG:root:Server started at 00:08
+ERROR:root:[Errno 98] Address already in use at 00:08
+DEBUG:root:Port 8080 in use, using alternative port
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Alice"}' at 00:08
+DEBUG:root:User 'Alice', '127.0.0.1' , '60142' connected at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 00:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '60146' connected at 00:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Bob", "p": "65059312843440070407666911507680514446391952431026922544679673217712072304207", "g": "110548703960426823433633020734459515001097043850572918781988492148775724043159"}' at 00:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Bob", "key": 35424369649581132106532585204684399461899386819366194437563110402242291435162}' at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "disconnecting", "time_sent": "00:08", "sender": "Bob"}' at 00:08
+DEBUG:root:Server receive b'' at 00:08
+DEBUG:root:User 'Bob' disconnected at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 00:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '60156' connected at 00:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Alice", "p": "80299726335423766467668753634552644102979227681235439449151778865413275183903", "g": "110013627841190868215141811092265019982656815447447174695615671881821907235661"}' at 00:08
+DEBUG:root:Server receive b'{"target": "Bob", "time_sent": "00:08", "sender": "Alice", "key": 4954351915307518585181127461450081521831611896236765678744591386428057615054}' at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "disconnecting", "time_sent": "00:08", "sender": "Bob"}' at 00:08
+DEBUG:root:Server receive b'' at 00:08
+DEBUG:root:User 'Bob' disconnected at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "connected", "sender": "Bob"}' at 00:08
+DEBUG:root:User 'Bob', '127.0.0.1' , '60164' connected at 00:08
+DEBUG:root:Server receive b'{"target": "Bob", "message": "test", "time_sent": "00:08", "sender": "Alice"}' at 00:08
+DEBUG:root:Server receive b'{"target": "Alice", "status": "Message received", "time_sent": "00:08", "sender": "Bob"}' at 00:08
+DEBUG:root:Server receive b'{"target": "server", "status": "disconnecting", "time_sent": "00:08", "sender": "Alice"}' at 00:08
+DEBUG:root:Server receive b'' at 00:08
+DEBUG:root:User 'Alice' disconnected at 00:08
+DEBUG:root:Server receive b'' at 00:08
+DEBUG:root:User 'Bob' disconnected at 00:08

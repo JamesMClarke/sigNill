@@ -3,9 +3,11 @@ import json as js
 from os import error
 from users import Users
 from tools import reg_input
-import socket, errno,threading, sys, logging,bcrypt
+import socket, errno,threading, sys, logging, bcrypt
 
-logging.basicConfig(filename="data/logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+#TODO Handle ConnectionResetError and remove from connected users
+
+logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
 class Server:
 
