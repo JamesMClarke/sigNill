@@ -60,8 +60,6 @@ class Client:
         
         while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
-            print(data)
-            print(len(data))
             if(len(data) > 0):
                 data = js.loads(data.decode('utf-8'))
                 #If P and G are in the message
@@ -71,7 +69,6 @@ class Client:
                         #If not create a new key
                         key = Key(data['sender'], int(data['p']), int(data['g']))
                         self.keys.add_key(key)
-                        print("Keys: "+str(self.keys))
                         #Generate and send public key
                         data = {
                             'target':data['sender'],
@@ -91,7 +88,14 @@ class Client:
                 #If message sent from sender print
                 if ('message' in data):
                     sender = data["sender"]
-                    print(sender,": ",data['message'])
+                    message = data['message']
+                    #Nonce will only be in the data if it is encrypted
+                    if('nonce' in data):
+                        key = self.keys.find_key_by_name(sender)
+                        message = key.decrypt(data['message'],data['nonce'])
+                        message = message.decode('utf-8')
+
+                    print(sender,": ",message)
 
                     #Sends received receipt
                     time_sent =datetime.now().strftime("%H:%m")
@@ -178,29 +182,23 @@ class Client:
         self.mesg_loop = True
         while self.mesg_loop:
             mesg = reg_input("type message:  ", str)
-            #TODO Encrypt message with key
-            #char limit on message
-            valid = False
-            while not valid:
-                if(len(mesg)<50):
-                    valid = True
-                else:
-                    print("There is a 50 character limit on messages")
-                    mesg = reg_input("Type message:  ", str)
             
+                       
             if(mesg ==":q"):
                 self.handler_loop = False
                 self.mesg_loop = False
             else:   
                 time_sent =datetime.now().strftime("%H:%m")
-
+                key = self.keys.find_key_by_name(target)
+                if(key != None):
+                    message, nonce = key.encrypt(mesg)
                 data = {
                     'target':target,
-                    'message':mesg,
+                    'message':message.decode('utf-8'),
+                    'nonce':nonce.decode('utf-8'),
                     'time_sent':str(time_sent),
                     'sender':self.username
                     }
-
                 data = js.dumps(data)
                 self.tcp_sock.send(bytes(data,encoding='utf-8'))
         self.menu()

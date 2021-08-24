@@ -62,11 +62,13 @@ class Key:
         nonce = cipher.nonce
         ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode())
         message = base64.b64encode(ciphertext)
+        nonce = base64.b64encode(nonce)
         return message, nonce
     
     #Takes the encrypted message in base 64 and decrypts it
     def decrypt(self, message, nonce):
         ciphertext = base64.b64decode(message)
+        nonce = base64.b64decode(nonce)
         cipher = AES.new(self._shared.to_bytes(32,'big'), AES.MODE_EAX, nonce=nonce)
         plaintext = cipher.decrypt(ciphertext)
         return plaintext

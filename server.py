@@ -1,12 +1,15 @@
 from datetime import datetime
 import json as js
-from os import error
+from os import error, mkdir
 from users import Users
 from tools import reg_input
-import socket, errno,threading, sys, logging, bcrypt
+import socket, errno,threading, sys, logging, bcrypt, os
 
 #TODO Handle ConnectionResetError and remove from connected users
 
+#Check that the logs folder exists and if it doesn't creates one
+if(not os.path.isdir('logs')):
+    os.mkdir('logs')
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
 
 class Server:

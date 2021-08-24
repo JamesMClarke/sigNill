@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 #project config
+logs/
 /data/logs/**/*.log
 /data/**/*.json
