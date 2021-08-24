@@ -14,7 +14,7 @@ import itertools, sys, socket, threading, bcrypt, getpass
 #TODO add create data folder and config.json file
 
 config_file = 'data/config.json'
-branch = ""
+branch = "dev"
 def main():
     
     client = Client()
@@ -30,10 +30,9 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-        
-        if(branch !="dev"):
-            self.username = reg_input("enter username:   ", str)
-
+       
+        self.username = reg_input("enter username:   ", str)
+        if(branch != "dev"):
             self.load_user_config(config_file)
 
         self.connect_to_server()
@@ -46,8 +45,8 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
-            'sender':self.username,
-            'salt':str(self.salt)
+            'sender':self.username
+            #'salt':str(self.salt)
         }
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
@@ -226,16 +225,20 @@ class Client:
         __password = getpass.getpass("enter password:   ")
         __password2 = getpass.getpass("renter password: ")
 
-        #reruns create user if pwd do not match
+        #reruns create user if passwords do not match
         if(__password != __password2):
             print("passwords do not match")
             self.create_user()
+        else:
+            self.hash_pwd(__password)
+
 
         #TODO Fix this it can be easily tricked
         if(len(self.username)>10):
             print("Username is limited to 10 characters")
             self.username = reg_input("enter username:   ", str)
         
+
         #prevents blank username
         if(self.username ==""):
             self.create_user()
@@ -254,11 +257,14 @@ class Client:
                 data = js.load(read_file)
                 data = data['configuration']
                 for i in data:
-                    if (i["username"]== self.username):
+                    if (i["username"] == self.username):
                         print("Welcome: ",self.username) 
-                          
+                        
                     #if no user created runs create user  
-                    elif (i["username"] not in data):
+                    elif (i["username"] != self.username):
+                        print ("username does not match")
+                    
+                    else:
                         self.create_user()
                         print("No user found")
 

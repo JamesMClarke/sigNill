@@ -44,18 +44,9 @@ class Server:
                             #TODO save username salt and password to server json file
                             #TODO add compare function for already existing user
                             #TODO Check if a user is already connected with that account name
-                            username = data["sender"]
-                            __salt = data["salt"] 
-
-                            #passes username to load_user
-                            if(self.load_user(username) is None):
-                                print("no user")
-                                self.add_user(username,__salt)
-                            else:
-                                data_to_send = js.dumps({'sender':"server","data":str(__salt)})
-                                c.send(bytes(data_to_send,encoding='utf-8'))
-
+                            username = data["sender"]                           
                             self.users.add_user(username, c)
+                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
                     else:
