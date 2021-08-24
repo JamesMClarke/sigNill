@@ -14,7 +14,7 @@ import itertools, sys, socket, threading, bcrypt, getpass
 #TODO add create data folder and config.json file
 
 config_file = 'data/config.json'
-branch = "dev"
+branch = ""
 def main():
     
     client = Client()
@@ -31,10 +31,11 @@ class Client:
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
         
-        if((self.username == "") and (branch !="dev")):
+        if(branch !="dev"):
+            self.username = reg_input("enter username:   ", str)
+
             self.load_user_config(config_file)
 
-        self.create_user()
         self.connect_to_server()
         self.menu()
        
@@ -222,7 +223,6 @@ class Client:
     def create_user(self):
 
         #lets user define their username
-        self.username = reg_input("enter username:   ", str)
         __password = getpass.getpass("enter password:   ")
         __password2 = getpass.getpass("renter password: ")
 
@@ -254,10 +254,12 @@ class Client:
                 data = js.load(read_file)
                 data = data['configuration']
                 for i in data:
-                    if (i["username"]):
-                        self.username = i["username"]               
+                    if (i["username"]== self.username):
+                        print("Welcome: ",self.username) 
+                          
+                    #if no user created runs create user  
                     elif (i["username"] not in data):
-                        self.username = ""
+                        self.create_user()
                         print("No user found")
 
                 return self.username
@@ -266,7 +268,7 @@ class Client:
 
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.username}
+        js_obj ={"username":self.username,"salt":str(self.salt,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:

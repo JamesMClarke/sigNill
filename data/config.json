@@ -1,7 +1,16 @@
 {
-    "configuration":[
+    "configuration": [
         {
-            
+            "username": "bob",
+            "salt": "$2b$16$2SN.cpJu1GDJPzlVhLmxDe"
+        },
+        {
+            "username": "bob",
+            "salt": "$2b$16$FAsO8dSHogzqfHKVyhDUNu"
+        },
+        {
+            "username": "jeff",
+            "salt": "$2b$16$eSv/CewSKTfhqekfbAY8Be"
         }
     ]
 }
