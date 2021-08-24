@@ -1,10 +1,12 @@
-import os
-import codecs
+import base64
+import os, codecs, math
+from Crypto.Cipher import AES
 from Crypto.Util import number
 from time import time
 
+
 class Key:
-    _key_bits = 1024
+    _key_bits = 256
     _P: int
     _G: int
     _private: int
@@ -46,20 +48,20 @@ class Key:
     def get_shared(self):
         return self._shared
 
-    def encrypt(self, text):
-        #Converts the string to hex
-        t = bytes(text, "utf-8").hex()
-        #Multiplies the string by the shared key
-        encrypted = hex(int(t,16) * self._shared)
-        return encrypted
+    #Encrypts the messages using AES and returns it in base 64
+    def encrypt(self, plaintext):
+        cipher = AES.new(self._shared.to_bytes(32,'big'), AES.MODE_EAX)
+        nonce = cipher.nonce
+        ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode())
+        message = base64.b64encode(ciphertext)
+        return message, nonce
     
-    def decrypt(self, message):
-        #Decrypt the message
-        num = hex(int(message, 16) // self._shared)
-        #Takes off the first to chars and then converst back to string
-        text = codecs.decode(str(num)[2 : ], "hex")
-        text = str(text,'utf-8')
-        return text
+    #Takes the encrypted message in base 64 and decrypts it
+    def decrypt(self, message, nonce):
+        ciphertext = base64.b64decode(message)
+        cipher = AES.new(self._shared.to_bytes(32,'big'), AES.MODE_EAX, nonce=nonce)
+        plaintext = cipher.decrypt(ciphertext)
+        return plaintext
 
 """
 #Example set-up
@@ -80,9 +82,9 @@ Bob.generate_shared(Alice_Public)
 print(time()-start)
 print(Alice.get_shared())
 print(Bob.get_shared())
-message = Alice.encrypt("test")
-print(Bob.decrypt(message))
+message, nonce = Alice.encrypt("Hello There")
+print(message)
+print(Bob.decrypt(message, nonce))
 print(time()-start)
-
 """
 
