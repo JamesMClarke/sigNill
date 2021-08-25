@@ -47,6 +47,7 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
+            'data':str(self.__salt,encoding='utf-8'),
             'sender':self.__username
             #'salt':str(self.salt)
         }
@@ -319,14 +320,13 @@ class Client:
                     print("No user found: Creating User")
                     self.create_user()
                 
-                
                 elif("username"  in data[0]):
                     self.__username = data[0]['username'] 
                     self.__salt = data[0]['salt']
                     print("Welcome: ",self.__username) 
                     
                
-        except : 
+        except FileNotFoundError: 
             print("error in config")
 
     # if no user in config saves username to config
@@ -347,8 +347,8 @@ class Client:
     #add loading indicator
     def hash_pwd(self,password):        
         password.encode("utf-8")
-        self.salt = bcrypt.gensalt(rounds=16)
-        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.salt))
+        self.__salt = bcrypt.gensalt(rounds=16)
+        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
         
         return hashed_pwd
 
