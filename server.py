@@ -12,7 +12,7 @@ reg_users_file = "data/reg_users.json"
 branch = "dev"
 
 #TODO Handle ConnectionResetError and remove from connected users
-
+#TODO if client is registered send salt to client if not save client username and salt to reg_users
 #Check that the logs folder exists and if it doesn't creates one
 if(not os.path.isdir('logs')):
     os.mkdir('logs')

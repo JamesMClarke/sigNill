@@ -294,7 +294,6 @@ class Client:
                 password_match = True
          
         self.hash_pwd(__password)
-
         #TODO Fix this it can be easily tricked
         if(len(self.__username)>10):
             print("Username is limited to 10 characters")
