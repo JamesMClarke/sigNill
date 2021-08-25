@@ -52,12 +52,12 @@ class Server:
                             #TODO save username salt and password to server json file
                             #TODO add compare function for already existing user
                             #TODO Check if a user is already connected with that account name
-                            __username = data["sender"] 
-                            __salt =  data["data"]
-                            self.check_user(__username,__salt)                       
+                            username = data["sender"] 
+                            salt =  data["data"]
+                            self.check_user(username,salt)                       
                             self.users.add_user(username, c)
-                            print("User '%s' connected at %s"%(__username, datetime.now().strftime("%H:%m")))
-                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(__username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
@@ -90,7 +90,7 @@ class Server:
                             data = js.dumps(data)
                             target_ip.send(bytes(data,encoding='utf-8'))
                         else:
-                            data_to_send = js.dumps({"status":"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
+                            data_to_send = js.dumps({'sender': "server", 'status':"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
                             c.send(bytes(data_to_send,encoding='utf-8'))
 
             # if no data connection lost client connection closed close

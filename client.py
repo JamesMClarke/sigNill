@@ -26,7 +26,7 @@ class Client:
     
     #creates socket 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    username = ""
+    __username = ""
     keys = Keys()
     server_key = Key('server')
 
@@ -81,11 +81,7 @@ class Client:
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
                             'sender':self.__username,
-<<<<<<< HEAD
                             'key': key.generate_public_key().decode('utf-8')
-=======
-                            'key': key.generate_public_key()
->>>>>>> cec739b18c4f6ac3f4c3ccc536f8e8f59fb590b2
                             }
                         print(data)
                         data = js.dumps(data)
@@ -137,11 +133,6 @@ class Client:
                     else:
                         print(data['status'])
 
-                    #receives salt from server
-                    if((data['sender'] == "server") and (data['data'])):
-                        print("here is where the hwd comapre will run", data['sender'], data['data'])
-
-
                 if not data:
                     print('Cannot connect to server')
                     break
@@ -184,11 +175,7 @@ class Client:
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
                 'sender':self.__username,
-<<<<<<< HEAD
                 'key': key.generate_public_key().decode('utf-8')
-=======
-                'key': key.generate_public_key()
->>>>>>> cec739b18c4f6ac3f4c3ccc536f8e8f59fb590b2
                 }
             print(data)
             data = js.dumps(data)
