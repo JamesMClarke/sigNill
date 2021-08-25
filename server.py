@@ -7,12 +7,17 @@ from users import Users
 from tools import reg_input
 import socket, errno,threading, sys, logging, bcrypt, os
 
+
+reg_users_file = "data/reg_users.json"
+branch = "dev"
+
 #TODO Handle ConnectionResetError and remove from connected users
 
 #Check that the logs folder exists and if it doesn't creates one
 if(not os.path.isdir('logs')):
     os.mkdir('logs')
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+
 
 class Server:
 
@@ -56,7 +61,7 @@ class Server:
                             salt =  data["data"]
                             #TODO remove print after dev
                             print(salt)
-                            self.check_user(username,salt)                       
+                            self.check_user(username,salt,reg_users_file)                       
                             self.users.add_user(username, c)
                             print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
@@ -177,33 +182,31 @@ class Server:
 
 
     #checks if user is in reg_user.json   
-    def check_user(self,username,salt):
-        file = "data/reg_users.json"
+    def check_user(self,username,salt,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
-                data = data['registered_users']
-                #if username equals i["username"] loads salt and hash comapres salt and hash 
-            
-                    #if username is not in data or data len is 0 add user
-                if ((username  not in data) or (len(data) == 0)):
-                    
-                    print("User not registered")
-                    self.save_user_to_server_config(username,salt)
+                data = data["registered_users"]
+                #if data is empty add user
+                if (len(data) == 0):
+                    self.save_user_to_server_config(username,salt,reg_users_file)
 
+                for i in data:
+                    print(len(data))
+                    if (username  != i["username"]):
+                        #self.save_user_to_server_config(username,salt,reg_users_file)
+                        print("user nto registered")
 
-                elif (username in data[i]):
-                    print("user found")
+                    elif (username ==  i["username"]):
+                        print("user already registered")                   
+        
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
-        pass
 
 
-    def save_user_to_server_config(self,__username,__salt):
+    def save_user_to_server_config(self,__username,__salt,file):
         js_obj = {"username":str(__username),"salt":__salt }
-
-        file = "data/reg_users.json"
         try:
             with open(file,"r+") as file:
                 data = js.load(file)
