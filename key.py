@@ -35,12 +35,13 @@ class Key:
     #Generates the public key to be shared
     def generate_public_key(self):
         self._public = pow(self._G, self._private, self._P)
-        return self._public
+        bytes = self._public.to_bytes(32, 'big')
+        public_to_send = base64.b64encode(bytes)
+        return public_to_send
 
     #Generates the shared private key
     def generate_shared(self, public2):
-        #TODO make base 64 for easier sending
-        #self.shared = (public2**self.private)%self.P
+        public2 = int.from_bytes(base64.b64decode(public2),'big')
         self._shared = pow(public2, self._private, self._P)
 
     def get_P(self):
@@ -99,6 +100,8 @@ print("Gen public")
 print(time()-start)
 Alice_Public = Alice.generate_public_key()
 Bob_public = Bob.generate_public_key()
+print(Alice_Public)
+print(Bob_public)
 print(time()-start)
 print("Gen shared")
 Alice.generate_shared(Bob_public)
