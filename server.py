@@ -52,10 +52,12 @@ class Server:
                             #TODO save username salt and password to server json file
                             #TODO add compare function for already existing user
                             #TODO Check if a user is already connected with that account name
-                            username = data["sender"]                           
+                            __username = data["sender"] 
+                            __salt =  data["data"]
+                            self.check_user(__username,__salt)                       
                             self.users.add_user(username, c)
-                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
-                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+                            print("User '%s' connected at %s"%(__username, datetime.now().strftime("%H:%m")))
+                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(__username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
@@ -172,31 +174,40 @@ class Server:
                 print("Please enter a valid command")
     #loads registered users and checks if user is already in server
     
-    def load_user(self,username):
+    def check_user(self,__username,__salt):
         file = "data/reg_users.json"
-
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data['registered_users']
                 #if username equals i["username"] loads salt and hash comapres salt and hash 
                 for i in data:
-                    if (i["username"] == username):
+                    if (i["username"] == __username):
                         __salt = i["salt"]
                         print(i["username"],i["salt"])
-                        return __salt
 
-                    elif (i["username"] != username):
+                    elif (i["username"] != __username):
+                        self.save_user_to_server_config(__username,__salt)
                         print("No user found\n registering user")
-                        return 
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
         pass
 
 
-    def add_user(self):
-        pass
+    def save_user_to_server_config(self,__username,__salt):
+        js_obj = {"username":str(__username),"salt":__salt }
+
+        file = "data/reg_users.json"
+        try:
+            with open(file,"r+") as file:
+                data = js.load(file)
+                data['config'].append(js_obj)
+                file.seek(0)
+                js.dump(data,file,indent=4)
+                print("user created\nWelcome: ",self.__username)
+        except FileNotFoundError:
+            print("config not found")
 
    
     #initializes server

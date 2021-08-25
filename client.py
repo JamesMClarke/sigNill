@@ -48,6 +48,7 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
+            'data':str(self.__salt,encoding='utf-8'),
             'sender':self.__username
             #'salt':str(self.salt)
         }
@@ -80,7 +81,11 @@ class Client:
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
                             'sender':self.__username,
+<<<<<<< HEAD
                             'key': key.generate_public_key().decode('utf-8')
+=======
+                            'key': key.generate_public_key()
+>>>>>>> cec739b18c4f6ac3f4c3ccc536f8e8f59fb590b2
                             }
                         print(data)
                         data = js.dumps(data)
@@ -179,7 +184,11 @@ class Client:
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
                 'sender':self.__username,
+<<<<<<< HEAD
                 'key': key.generate_public_key().decode('utf-8')
+=======
+                'key': key.generate_public_key()
+>>>>>>> cec739b18c4f6ac3f4c3ccc536f8e8f59fb590b2
                 }
             print(data)
             data = js.dumps(data)
@@ -325,14 +334,13 @@ class Client:
                     print("No user found: Creating User")
                     self.create_user()
                 
-                
                 elif("username"  in data[0]):
                     self.__username = data[0]['username'] 
                     self.__salt = data[0]['salt']
                     print("Welcome: ",self.__username) 
                     
                
-        except : 
+        except FileNotFoundError: 
             print("error in config")
 
     # if no user in config saves username to config
@@ -353,8 +361,8 @@ class Client:
     #add loading indicator
     def hash_pwd(self,password):        
         password.encode("utf-8")
-        self.salt = bcrypt.gensalt(rounds=16)
-        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.salt))
+        self.__salt = bcrypt.gensalt(rounds=16)
+        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
         
         return hashed_pwd
 
