@@ -66,7 +66,7 @@ class Server:
                                 'target':data['sender'],
                                 'time_sent':str(datetime.now().strftime("%H:%m")),
                                 'sender':self.username,
-                                'key': key.generate_public_key()
+                                'key': key.generate_public_key().decode('utf-8')
                                 }
                             data = js.dumps(data)
                             c.send(bytes(data,encoding='utf-8'))

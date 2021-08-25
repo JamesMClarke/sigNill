@@ -79,13 +79,8 @@ class Client:
                         data = {
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
-<<<<<<< HEAD
-                            'sender':self.username,
-                            'key': key.generate_public_key().decode('utf-8')
-=======
                             'sender':self.__username,
-                            'key': key.generate_public_key()
->>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
+                            'key': key.generate_public_key().decode('utf-8')
                             }
                         print(data)
                         data = js.dumps(data)
@@ -93,6 +88,8 @@ class Client:
                 elif('key' in data):
                     #Generate shaired key
                     key = self.keys.find_key_by_name(data['sender'])
+                    print(key)
+                    print(data['sender'])
                     if(not key.shared_set()):
                         key.generate_shared(data['key'])
                         
@@ -181,13 +178,8 @@ class Client:
             data = {
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
-<<<<<<< HEAD
-                'sender':self.username,
-                'key': key.generate_public_key().decode('utf-8')
-=======
                 'sender':self.__username,
-                'key': key.generate_public_key()
->>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
+                'key': key.generate_public_key().decode('utf-8')
                 }
             print(data)
             data = js.dumps(data)
