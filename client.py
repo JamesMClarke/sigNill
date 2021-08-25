@@ -11,7 +11,6 @@ import itertools, sys, socket, threading, bcrypt, getpass
 #TODO Store shared key after it has been generated maybe
 #TODO Add text colour from config json
 #TODO Add choose text colour 
-#TODO Add password verification 
 #TODO Add store freinds to config.json
 #TODO if a username already exists do not create a new one
 #TODO add create data folder and config.json file
@@ -55,7 +54,6 @@ class Client:
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
-        #TODO Implement server key
         #Creates a key for the server
         self.create_key("server")
         #Wait for server to send public key back?

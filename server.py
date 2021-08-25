@@ -57,32 +57,19 @@ class Server:
                     target = str(data["target"])
                     #Server commands
                     if(target == "server"):
-<<<<<<< HEAD
-                        if("status" in data):
+                        if('status' in data):
                             if(data['status'] == "connected"):
                                 #TODO save username salt and password to server json file
                                 #TODO add compare function for already existing user
                                 #TODO Check if a user is already connected with that account name
                                 username = data["sender"] 
                                 salt =  data["data"]
-                                self.check_user(username,salt)                       
+                                #TODO remove print after dev
+                                print(salt)
+                                self.check_user(username,salt,reg_users_file)                       
                                 self.users.add_user(username, c)
                                 print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                                 logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
-=======
-                        if(data['status'] == "connected"):
-                            #TODO save username salt and password to server json file
-                            #TODO add compare function for already existing user
-                            #TODO Check if a user is already connected with that account name
-                            username = data["sender"] 
-                            salt =  data["data"]
-                            #TODO remove print after dev
-                            print(salt)
-                            self.check_user(username,salt,reg_users_file)                       
-                            self.users.add_user(username, c)
-                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
-                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
->>>>>>> caf5d5e521f7c3003c0de8b5a6e0850dfc5658df
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
@@ -252,11 +239,7 @@ class Server:
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-<<<<<<< HEAD
         self.buf_size = 2048
-=======
-        self.buf_size = 512
->>>>>>> caf5d5e521f7c3003c0de8b5a6e0850dfc5658df
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
