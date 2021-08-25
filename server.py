@@ -40,34 +40,41 @@ class Server:
             data = c.recv(self.buf_size)
             logging.debug("Server receive %s at %s"%(data, datetime.now().strftime("%H:%m")))
             if(data):
+                print(data)
                 data = js.loads(data)
+
+                if("nonce" in data):
+                    if("message" in data):
+                        self.forward(data['message'],data['nonce'],data['sender'])
                             
                 #direct messaging if keys target and message in data retrieves target ip by searching for username
                 if ("target" in data):
                     target = str(data["target"])
-                    #TODO Add check for if the whole packet is encrypted
                     #Server commands
                     if(target == "server"):
-                        if(data['status'] == "connected"):
-                            #TODO save username salt and password to server json file
-                            #TODO add compare function for already existing user
-                            #TODO Check if a user is already connected with that account name
-                            username = data["sender"] 
-                            salt =  data["data"]
-                            self.check_user(username,salt)                       
-                            self.users.add_user(username, c)
-                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
-                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+                        if("status" in data):
+                            if(data['status'] == "connected"):
+                                #TODO save username salt and password to server json file
+                                #TODO add compare function for already existing user
+                                #TODO Check if a user is already connected with that account name
+                                username = data["sender"] 
+                                salt =  data["data"]
+                                self.check_user(username,salt)                       
+                                self.users.add_user(username, c)
+                                print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                                logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
-                            key = key(data['sender'], data['p'], data['g'])
+                            p = int(data['p'])
+                            g = int(data['g'])
+                            key = Key(data['sender'], p, g)
                             self.keys.add_key(key)
                             #Generate and send public key
                             data = {
                                 'target':data['sender'],
                                 'time_sent':str(datetime.now().strftime("%H:%m")),
-                                'sender':self.username,
+                                'sender':"server",
                                 'key': key.generate_public_key().decode('utf-8')
                                 }
                             data = js.dumps(data)
@@ -79,7 +86,15 @@ class Server:
                             key = self.keys.find_key_by_name(data['sender'])
                             if(not key.shared_set()):
                                 key.generate_shared(data['key'])
-
+                                print(key.get_shared())
+                        #If the message is encrypted
+                        elif('nonce' in data):
+                            key = self.keys.find_key_by_name(data['sender'])
+                            #This will be for a message to be forwarded on to another user
+                            if('message' in data):
+                                plaintext = key.decrypt(data['message'], data['nonce'])
+                                print(plaintext)
+                            #TODO Add check for if password are encrypted
                     else:
                     
                         target_ip = self.users.find_conn_by_name(target)
@@ -216,7 +231,7 @@ class Server:
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-        self.buf_size = 256
+        self.buf_size = 2048
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
@@ -241,6 +256,41 @@ class Server:
             handler_thread = threading.Thread(target=self.handler,args = (c,a))
             handler_thread.daemon =True
             handler_thread.start() 
+    
+    def decrypt(self, message, sender, nonce):
+        key = self.keys.find_key_by_name(sender)
+        plaintext = key.decrypt(message, nonce)
+        plaintext = plaintext.decode('utf-8')
+        return plaintext
+
+    #Encrypts and sends a message
+    def encrypt_and_send(self, data, target):
+        key = self.keys.find_key_by_name(target)
+        print(data)
+        ciphertext, nonce = key.encrypt(data)
+        data = {
+            'target':target,
+            'message':ciphertext.decode('utf-8'),
+            'nonce':nonce.decode('utf-8'),
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':"server"
+            }
+        data = js.dumps(data)
+        conn = self.users.find_conn_by_name(target)
+        conn.send(bytes(data,encoding='utf-8'))
+
+    #Forwards on an encrypted message to the appropriate user
+    def forward(self, message, nonce, sender):
+        plaintext = self.decrypt(message, sender, nonce)
+        data = js.loads(plaintext)
+        target = data['target']
+        print(target)
+        data = js.dumps(data)
+        #TODO Add check that user is connected
+        if(target != "server"):
+            self.encrypt_and_send(data,target)
+
+
             
         
 server = Server()

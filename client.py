@@ -34,7 +34,7 @@ class Client:
         #initializes connection variables
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
-        self.buff_size = 1024
+        self.buff_size = 2048
         
         self.load_user_config(config_file)
 
@@ -55,8 +55,9 @@ class Client:
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
-        #Send P and G
-        #Generate and send public key
+        #TODO Implement server key
+        #Creates a key for the server
+        self.create_key("server")
         #Wait for server to send public key back?
 
 
@@ -87,12 +88,16 @@ class Client:
                         data = js.dumps(data)
                         self.tcp_sock.send(bytes(data,encoding='utf-8'))
                 elif('key' in data):
-                    #Generate shaired key
-                    key = self.keys.find_key_by_name(data['sender'])
+                    if(data['sender'] == "server"):
+                        key = self.server_key
+                    else:
+                        key = self.keys.find_key_by_name(data['sender'])
                     print(key)
                     print(data['sender'])
+                    #Generate shaired key
                     if(not key.shared_set()):
                         key.generate_shared(data['key'])
+                        print(key.get_shared())
                         
                 
                 #If message sent from sender print
@@ -101,9 +106,12 @@ class Client:
                     message = data['message']
                     #Nonce will only be in the data if it is encrypted
                     if('nonce' in data):
-                        key = self.keys.find_key_by_name(sender)
-                        message = key.decrypt(data['message'],data['nonce'])
-                        message = message.decode('utf-8')
+                        message = self.decrypt(message, sender, data['nonce'])
+                        if(sender == "server"):
+                            print(message)
+                            message = js.loads(message)
+                            sender = message['sender']
+                            message = self.decrypt(message["message"], sender, message["nonce"])
 
                     print(sender,": ",message)
 
@@ -151,40 +159,11 @@ class Client:
     #sends message to server based on username of recipient who is set as target
     def send_mesg(self):
         target = reg_input("Who do you want to message: ", str)
-        #TODO Add encryption
         #Check if user is the one starting the conversation
         #TODO The client should probably check the user is a person on the server before key gen
         if(self.keys.find_key_by_name(target) == None):
-            #If they are generate and send P and G to other user
-            key = Key(target)
-            self.keys.add_key(key)
-            P, G = key.get_P_G()
-            #Send P and G
-            data = {
-                    'target':target,
-                    'time_sent':str(datetime.now().strftime("%H:%m")),
-                    'sender':self.__username,
-                    'p': str(P),
-                    'g': str(G)
-                    }
-            data = js.dumps(data)
-            self.tcp_sock.send(bytes(data,encoding='utf-8'))
-            #TODO Add check that they have received p and g
-            #Generate public key and send public key
-            data = {
-                'target':target,
-                'time_sent':str(datetime.now().strftime("%H:%m")),
-                'sender':self.__username,
-                'key': key.generate_public_key().decode('utf-8')
-                }
-            print(data)
-            data = js.dumps(data)
-            self.tcp_sock.send(bytes(data,encoding='utf-8'))
-            #Wait for shaired key to be generated
-            while(not key.shared_set):
-                sleep(1)
-            #When you have received their shaired key generate shared key
-            #Send encrypted message and nonce 
+            self.create_key(target)
+
         self.mesg_loop = True
         while self.mesg_loop:
             mesg = reg_input("type message:  ", str)
@@ -206,7 +185,8 @@ class Client:
                     'sender':self.__username
                     }
                 data = js.dumps(data)
-                self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                self.send_to_server(data)
+                #self.tcp_sock.send(bytes(data,encoding='utf-8'))
         self.menu()
 
     #initializes connection to server 
@@ -362,6 +342,63 @@ class Client:
                 __allow_user_login = True
 
             return __allow_user_login
+
+    def create_key(self, target):
+            #Generate and send P and G to other user
+            if(target != "server"):
+                key = Key(target)
+                self.keys.add_key(key)
+                P, G = key.get_P_G()
+                public_key = key.generate_public_key().decode('utf-8')
+            else:
+                P, G = self.server_key.get_P_G()
+                public_key = self.server_key.generate_public_key().decode('utf-8')
+
+            #Send P and G
+            data = {
+                    'target':target,
+                    'time_sent':str(datetime.now().strftime("%H:%m")),
+                    'sender':self.__username,
+                    'p': str(P),
+                    'g': str(G)
+                    }
+            data = js.dumps(data)
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+            sleep(1)
+            #TODO Add check that they have received p and g
+            #Generate public key and send public key
+            data = {
+                'target':target,
+                'time_sent':str(datetime.now().strftime("%H:%m")),
+                'sender':self.__username,
+                'key': public_key
+                }
+            print(data)
+            data = js.dumps(data)
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+            #Wait for shaired key to be generated
+
+    #Encrypts the whole message and sends it to sever within it's own message
+    def send_to_server(self, data):
+        ciphertext, nonce = self.server_key.encrypt(data)
+        data = {
+            'target':'server',
+            'message':ciphertext.decode('utf-8'),
+            'nonce':nonce.decode('utf-8'),
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':self.__username
+            }
+        data = js.dumps(data)
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))
+
+    def decrypt(self, message, sender, nonce):
+        if(sender != "server"):
+            key = self.keys.find_key_by_name(sender)
+        else:
+            key = self.server_key
+        plaintext = key.decrypt(message, nonce)
+        plaintext = plaintext.decode('utf-8')
+        return plaintext
 
 
 
