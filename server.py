@@ -54,6 +54,8 @@ class Server:
                             #TODO Check if a user is already connected with that account name
                             username = data["sender"] 
                             salt =  data["data"]
+                            #TODO remove print after dev
+                            print(salt)
                             self.check_user(username,salt)                       
                             self.users.add_user(username, c)
                             print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
@@ -172,23 +174,26 @@ class Server:
 
             else:
                 print("Please enter a valid command")
-    #loads registered users and checks if user is already in server
-    
-    def check_user(self,__username,__salt):
+
+
+    #checks if user is in reg_user.json   
+    def check_user(self,username,salt):
         file = "data/reg_users.json"
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data['registered_users']
                 #if username equals i["username"] loads salt and hash comapres salt and hash 
-                for i in data:
-                    if (i["username"] == __username):
-                        __salt = i["salt"]
-                        print(i["username"],i["salt"])
+            
+                    #if username is not in data or data len is 0 add user
+                if ((username  not in data) or (len(data) == 0)):
+                    
+                    print("User not registered")
+                    self.save_user_to_server_config(username,salt)
 
-                    elif (i["username"] != __username):
-                        self.save_user_to_server_config(__username,__salt)
-                        print("No user found\n registering user")
+
+                elif (username in data[i]):
+                    print("user found")
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
@@ -202,10 +207,10 @@ class Server:
         try:
             with open(file,"r+") as file:
                 data = js.load(file)
-                data['config'].append(js_obj)
+                data['registered_users'].append(js_obj)
                 file.seek(0)
                 js.dump(data,file,indent=4)
-                print("user created\nWelcome: ",self.__username)
+                print("user saved to registered users")
         except FileNotFoundError:
             print("config not found")
 
@@ -216,7 +221,7 @@ class Server:
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
-        self.buf_size = 256
+        self.buf_size = 512
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
