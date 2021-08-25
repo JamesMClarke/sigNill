@@ -1,3 +1,4 @@
+from re import I
 from time import gmtime, sleep
 from key import Key
 import json as js
@@ -34,10 +35,8 @@ class Client:
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 1024
-       
-        self.username = reg_input("enter username:   ", str)
-        if(branch != "dev"):
-            self.load_user_config(config_file)
+        
+        self.load_user_config(config_file)
 
         self.connect_to_server()
         self.menu()
@@ -49,7 +48,7 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
-            'sender':self.username
+            'sender':self.__username
             #'salt':str(self.salt)
         }
         data = js.dumps(data)
@@ -80,8 +79,13 @@ class Client:
                         data = {
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
+<<<<<<< HEAD
                             'sender':self.username,
                             'key': key.generate_public_key().decode('utf-8')
+=======
+                            'sender':self.__username,
+                            'key': key.generate_public_key()
+>>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
                             }
                         print(data)
                         data = js.dumps(data)
@@ -111,7 +115,7 @@ class Client:
                         'target':sender,
                         'status':"Message received",
                         'time_sent':str(time_sent),
-                        'sender': self.username
+                        'sender': self.__username
                         }
                     data = js.dumps(data)
                     self.tcp_sock.send(bytes(data,encoding='utf-8'))
@@ -166,7 +170,7 @@ class Client:
             data = {
                     'target':target,
                     'time_sent':str(datetime.now().strftime("%H:%m")),
-                    'sender':self.username,
+                    'sender':self.__username,
                     'p': str(P),
                     'g': str(G)
                     }
@@ -177,8 +181,13 @@ class Client:
             data = {
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
+<<<<<<< HEAD
                 'sender':self.username,
                 'key': key.generate_public_key().decode('utf-8')
+=======
+                'sender':self.__username,
+                'key': key.generate_public_key()
+>>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
                 }
             print(data)
             data = js.dumps(data)
@@ -206,7 +215,7 @@ class Client:
                     'message':message.decode('utf-8'),
                     'nonce':nonce.decode('utf-8'),
                     'time_sent':str(time_sent),
-                    'sender':self.username
+                    'sender':self.__username
                     }
                 data = js.dumps(data)
                 self.tcp_sock.send(bytes(data,encoding='utf-8'))
@@ -254,7 +263,7 @@ class Client:
         elif(cmd == "2"):
             #TODO Fully impellent changing username
             #If this is changed after the user has already connected to the server it will need to be changed there as well
-            self.username = reg_input("enter username:   ", str)
+            self.__username = reg_input("enter username:   ", str)
             pass
         elif(cmd =="0"):
             try:
@@ -264,7 +273,7 @@ class Client:
                     'target':"server",
                     'status':'disconnecting',
                     'time_sent':str(time_sent),
-                    'sender':self.username
+                    'sender':self.__username
                     }
 
                 data = js.dumps(data)
@@ -283,6 +292,7 @@ class Client:
     def create_user(self):
 
         #lets user define their username
+        self.__username = reg_input("enter username:   ", str)
         __password = getpass.getpass("enter password:   ")
         __password2 = getpass.getpass("renter password: ")
 
@@ -295,13 +305,13 @@ class Client:
 
 
         #TODO Fix this it can be easily tricked
-        if(len(self.username)>10):
+        if(len(self.__username)>10):
             print("Username is limited to 10 characters")
-            self.username = reg_input("enter username:   ", str)
+            self.__username = reg_input("enter username:   ", str)
         
 
         #prevents blank username
-        if(self.username ==""):
+        if(self.__username ==""):
             self.create_user()
         #passes password to be hashed
         self.hashed_password = (self.hash_pwd(__password))
@@ -309,6 +319,8 @@ class Client:
         #dosent save to config if dev
         if(branch != "dev"):
             self.save_to_config(config_file)
+        else:
+            print("client in dev mode not saving client")
 
      
     #loads user config infomation, if username not found in config returns null and runs create user
@@ -316,33 +328,32 @@ class Client:
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
-                data = data['configuration']
-                for i in data:
-                    if (i["username"] == self.username):
-                        print("Welcome: ",self.username) 
-                        
-                    #if no user created runs create user  
-                    elif (i["username"] != self.username):
-                        print ("username does not match")
+                data = data['config']
+                if (len(data)==0):                                          
+                    print("No user found: Creating User")
+                    self.create_user()
+                
+                
+                elif("username"  in data[0]):
+                    self.__username = data[0]['username'] 
+                    self.__salt = data[0]['salt']
+                    print("Welcome: ",self.__username) 
                     
-                    else:
-                        self.create_user()
-                        print("No user found")
-
-                return self.username
-        except: 
+               
+        except : 
             print("error in config")
 
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.username,"salt":str(self.salt,encoding='utf-8')}
+        js_obj ={"username":self.__username,"salt":str(self.salt,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:
                 data = js.load(file)
-                data['configuration'].append(js_obj)
+                data['config'].append(js_obj)
                 file.seek(0)
                 js.dump(data,file,indent=4)
+                print("user created\nWelcome: ",self.__username)
         except FileNotFoundError:
             print("config not found")
 
