@@ -258,29 +258,28 @@ class Client:
 
     #if users is not found in config.json, creates username
     def create_user(self):
-
-        #lets user define their username
+        password_match = False
         self.__username = reg_input("enter username:   ", str)
-        __password = getpass.getpass("enter password:   ")
-        __password2 = getpass.getpass("renter password: ")
+        if (self.__username ==""):
+                self.__username = reg_input("enter username:   ", str)
 
-        #reruns create user if passwords do not match
-        if(__password != __password2):
-            print("passwords do not match")
-            self.create_user()
-        else:
-            self.hash_pwd(__password)
+        while password_match == False:
+            __password = getpass.getpass("enter password:   ")
+            __password2 = getpass.getpass("renter password: ")
 
-
+            #reruns create user if passwords do not match
+            if(__password != __password2):
+                print("passwords do not match")
+            else:
+                password_match = True
+         
+        self.hash_pwd(__password)
         #TODO Fix this it can be easily tricked
         if(len(self.__username)>10):
             print("Username is limited to 10 characters")
             self.__username = reg_input("enter username:   ", str)
         
-
-        #prevents blank username
-        if(self.__username ==""):
-            self.create_user()
+       
         #passes password to be hashed
         self.hashed_password = (self.hash_pwd(__password))
 

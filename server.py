@@ -7,12 +7,17 @@ from users import Users
 from tools import reg_input
 import socket, errno,threading, sys, logging, bcrypt, os
 
-#TODO Handle ConnectionResetError and remove from connected users
 
+reg_users_file = "data/reg_users.json"
+branch = "dev"
+
+#TODO Handle ConnectionResetError and remove from connected users
+#TODO if client is registered send salt to client if not save client username and salt to reg_users
 #Check that the logs folder exists and if it doesn't creates one
 if(not os.path.isdir('logs')):
     os.mkdir('logs')
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+
 
 class Server:
 
@@ -52,6 +57,7 @@ class Server:
                     target = str(data["target"])
                     #Server commands
                     if(target == "server"):
+<<<<<<< HEAD
                         if("status" in data):
                             if(data['status'] == "connected"):
                                 #TODO save username salt and password to server json file
@@ -63,6 +69,20 @@ class Server:
                                 self.users.add_user(username, c)
                                 print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                                 logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+=======
+                        if(data['status'] == "connected"):
+                            #TODO save username salt and password to server json file
+                            #TODO add compare function for already existing user
+                            #TODO Check if a user is already connected with that account name
+                            username = data["sender"] 
+                            salt =  data["data"]
+                            #TODO remove print after dev
+                            print(salt)
+                            self.check_user(username,salt,reg_users_file)                       
+                            self.users.add_user(username, c)
+                            print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                            logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+>>>>>>> caf5d5e521f7c3003c0de8b5a6e0850dfc5658df
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
@@ -187,40 +207,41 @@ class Server:
 
             else:
                 print("Please enter a valid command")
-    #loads registered users and checks if user is already in server
-    
-    def check_user(self,__username,__salt):
-        file = "data/reg_users.json"
+
+
+    #checks if user is in reg_user.json   
+    def check_user(self,username,salt,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
-                data = data['registered_users']
-                #if username equals i["username"] loads salt and hash comapres salt and hash 
-                for i in data:
-                    if (i["username"] == __username):
-                        __salt = i["salt"]
-                        print(i["username"],i["salt"])
+                data = data["registered_users"]
+                #if data is empty add user
+                if (len(data) == 0):
+                    self.save_user_to_server_config(username,salt,reg_users_file)
 
-                    elif (i["username"] != __username):
-                        self.save_user_to_server_config(__username,__salt)
-                        print("No user found\n registering user")
+                for i in data:
+                    print(len(data))
+                    if (username  != i["username"]):
+                        #self.save_user_to_server_config(username,salt,reg_users_file)
+                        print("user nto registered")
+
+                    elif (username ==  i["username"]):
+                        print("user already registered")                   
+        
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
-        pass
 
 
-    def save_user_to_server_config(self,__username,__salt):
+    def save_user_to_server_config(self,__username,__salt,file):
         js_obj = {"username":str(__username),"salt":__salt }
-
-        file = "data/reg_users.json"
         try:
             with open(file,"r+") as file:
                 data = js.load(file)
-                data['config'].append(js_obj)
+                data['registered_users'].append(js_obj)
                 file.seek(0)
                 js.dump(data,file,indent=4)
-                print("user created\nWelcome: ",self.__username)
+                print("user saved to registered users")
         except FileNotFoundError:
             print("config not found")
 
@@ -231,7 +252,11 @@ class Server:
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
+<<<<<<< HEAD
         self.buf_size = 2048
+=======
+        self.buf_size = 512
+>>>>>>> caf5d5e521f7c3003c0de8b5a6e0850dfc5658df
         
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
