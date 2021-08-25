@@ -1,5 +1,7 @@
 from datetime import datetime
 import json as js
+from keys import Keys
+from key import Key
 from os import error, mkdir
 from users import Users
 from tools import reg_input
@@ -17,6 +19,7 @@ class Server:
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connections = []
     users = Users()
+    keys = Keys()
 
     def __init__(self):
         logging.debug("Server started at %s"%(datetime.now().strftime("%H:%m")))
@@ -42,7 +45,7 @@ class Server:
                 #direct messaging if keys target and message in data retrieves target ip by searching for username
                 if ("target" in data):
                     target = str(data["target"])
-                    
+                    #TODO Add check for if the whole packet is encrypted
                     #Server commands
                     if(target == "server"):
                         if(data['status'] == "connected"):
@@ -53,6 +56,27 @@ class Server:
                             self.users.add_user(username, c)
                             print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                             logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+
+                        #If the data includes P and G then generate public key and send it back
+                        elif('p' in data and 'g' in data):
+                            key = key(data['sender'], data['p'], data['g'])
+                            self.keys.add_key(key)
+                            #Generate and send public key
+                            data = {
+                                'target':data['sender'],
+                                'time_sent':str(datetime.now().strftime("%H:%m")),
+                                'sender':self.username,
+                                'key': key.generate_public_key()
+                                }
+                            data = js.dumps(data)
+                            c.send(bytes(data,encoding='utf-8'))
+
+                        #If the data includes their public key generate shaired key
+                        elif('key' in data):
+                            #Generate shaired key
+                            key = self.keys.find_key_by_name(data['sender'])
+                            if(not key.shared_set()):
+                                key.generate_shared(data['key'])
 
                     else:
                     

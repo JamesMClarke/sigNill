@@ -27,6 +27,7 @@ class Client:
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     username = ""
     keys = Keys()
+    server_key = Key('server')
 
     def __init__(self):
         #initializes connection variables
@@ -54,6 +55,11 @@ class Client:
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
 
+        #Send P and G
+        #Generate and send public key
+        #Wait for server to send public key back?
+
+
     #handles data sent from the server
     def handler(self):
         self.handler_loop = True
@@ -61,6 +67,7 @@ class Client:
         while self.handler_loop:    
             data = self.tcp_sock.recv(self.buff_size)
             if(len(data) > 0):
+                print(data)
                 data = js.loads(data.decode('utf-8'))
                 #If P and G are in the message
                 if ('p' in data):
@@ -74,8 +81,9 @@ class Client:
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
                             'sender':self.username,
-                            'key': key.generate_public_key()
+                            'key': key.generate_public_key().decode('utf-8')
                             }
+                        print(data)
                         data = js.dumps(data)
                         self.tcp_sock.send(bytes(data,encoding='utf-8'))
                 elif('key' in data):
@@ -170,8 +178,9 @@ class Client:
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
                 'sender':self.username,
-                'key': key.generate_public_key()
+                'key': key.generate_public_key().decode('utf-8')
                 }
+            print(data)
             data = js.dumps(data)
             self.tcp_sock.send(bytes(data,encoding='utf-8'))
             #Wait for shaired key to be generated
@@ -216,11 +225,6 @@ class Client:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             self.send_user_data()
             print("connected to server")
-    
-    #method to send pulbic key
-    def send_pub_key(self):
-     
-        pass
 
     #method to encrypt mesg
     def encrypt_mesg(self,mesg):
