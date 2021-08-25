@@ -80,13 +80,8 @@ class Client:
                         data = {
                             'target':data['sender'],
                             'time_sent':str(datetime.now().strftime("%H:%m")),
-<<<<<<< HEAD
-                            'sender':self.username,
-                            'key': key.generate_public_key().decode('utf-8')
-=======
                             'sender':self.__username,
                             'key': key.generate_public_key()
->>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
                             }
                         print(data)
                         data = js.dumps(data)
@@ -182,13 +177,8 @@ class Client:
             data = {
                 'target':target,
                 'time_sent':str(datetime.now().strftime("%H:%m")),
-<<<<<<< HEAD
-                'sender':self.username,
-                'key': key.generate_public_key().decode('utf-8')
-=======
                 'sender':self.__username,
                 'key': key.generate_public_key()
->>>>>>> b2fe11cb67f2badb227019ddd78d2c0650216fad
                 }
             print(data)
             data = js.dumps(data)
