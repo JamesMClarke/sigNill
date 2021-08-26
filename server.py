@@ -47,11 +47,7 @@ class Server:
             if(data):
                 print(data)
                 data = js.loads(data)
-
-                if("nonce" in data):
-                    if("message" in data):
-                        self.forward(data['message'],data['nonce'],data['sender'])
-                            
+  
                 #direct messaging if keys target and message in data retrieves target ip by searching for username
                 if ("target" in data):
                     target = str(data["target"])
@@ -64,7 +60,6 @@ class Server:
                                 #TODO Check if a user is already connected with that account name
                                 username = data["sender"] 
                                 salt =  data["data"]
-                                #TODO remove print after dev
                                 print(salt)
                                 self.check_user(username,salt,reg_users_file)                       
                                 self.users.add_user(username, c)
@@ -94,26 +89,11 @@ class Server:
                             if(not key.shared_set()):
                                 key.generate_shared(data['key'])
                                 print(key.get_shared())
+                                
                         #If the message is encrypted
                         elif('nonce' in data):
-                            key = self.keys.find_key_by_name(data['sender'])
-                            #This will be for a message to be forwarded on to another user
-                            if('message' in data):
-                                plaintext = key.decrypt(data['message'], data['nonce'])
-                                print(plaintext)
-                            #TODO Add check for if password are encrypted
-                    else:
-                    
-                        target_ip = self.users.find_conn_by_name(target)
-
-                        #if target_ip not null senders name and message is sent to recipent
-                        if(target_ip != None):
-                            #create json object with username of sender and message so that the recpent knows who sent the message
-                            data = js.dumps(data)
-                            target_ip.send(bytes(data,encoding='utf-8'))
-                        else:
-                            data_to_send = js.dumps({'sender': "server", 'status':"User not connected",'time_sent':str(datetime.now().strftime("%H:%m"))})
-                            c.send(bytes(data_to_send,encoding='utf-8'))
+                            if("message" in data):
+                                self.forward(data['message'],data['nonce'],data['sender'])
 
             # if no data connection lost client connection closed close
             else:
@@ -272,8 +252,10 @@ class Server:
         return plaintext
 
     #Encrypts and sends a message
-    def encrypt_and_send(self, data, target):
+    def encrypt_and_send_message(self, data, target):
         key = self.keys.find_key_by_name(target)
+        if(key == None):
+            return False
         print(data)
         ciphertext, nonce = key.encrypt(data)
         data = {
@@ -286,6 +268,24 @@ class Server:
         data = js.dumps(data)
         conn = self.users.find_conn_by_name(target)
         conn.send(bytes(data,encoding='utf-8'))
+        return True
+    
+    def encrypt_and_send_status(self, status, target):
+        key = self.keys.find_key_by_name(target)
+        if(key == None):
+            return False
+        ciphertext, nonce = key.encrypt(status)
+        data = {
+            'target':target,
+            'status':ciphertext.decode('utf-8'),
+            'nonce':nonce.decode('utf-8'),
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':"server"
+            }
+        data = js.dumps(data)
+        conn = self.users.find_conn_by_name(target)
+        conn.send(bytes(data,encoding='utf-8'))
+        return True
 
     #Forwards on an encrypted message to the appropriate user
     def forward(self, message, nonce, sender):
@@ -294,9 +294,13 @@ class Server:
         target = data['target']
         print(target)
         data = js.dumps(data)
-        #TODO Add check that user is connected
         if(target != "server"):
-            self.encrypt_and_send(data,target)
+            #Checks user is still connected
+            if(not self.encrypt_and_send_message(data,target)):
+                #If they aren't then send a status message back
+                status = "User "+target+" is not currently connected"
+                self.encrypt_and_send_status(status, sender)
+
 
 
             

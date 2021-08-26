@@ -56,6 +56,9 @@ class Key:
     def get_shared(self):
         return self._shared
     
+    def get_public(self):
+        return self._public
+    
 
     #Encrypts the messages using AES and returns it in base 64
     def encrypt(self, plaintext):
