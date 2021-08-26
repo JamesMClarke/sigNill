@@ -260,6 +260,14 @@ class Client:
         self.__username = reg_input("enter username:   ", str)
         if (self.__username ==""):
                 self.__username = reg_input("enter username:   ", str)
+                
+        valid = False
+        while not valid:
+            if(len(self.__username)>10):
+                print("Username is limited to 10 characters")
+                self.__username = reg_input("enter username:   ", str)
+            else:
+                valid = True
 
         while password_match == False:
             __password = getpass.getpass("enter password:   ")
@@ -272,10 +280,7 @@ class Client:
                 password_match = True
          
         self.hash_pwd(__password)
-        #TODO Fix this it can be easily tricked
-        if(len(self.__username)>10):
-            print("Username is limited to 10 characters")
-            self.__username = reg_input("enter username:   ", str)
+        
         
        
         #passes password to be hashed
