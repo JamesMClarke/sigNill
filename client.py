@@ -14,7 +14,11 @@ import itertools, sys, socket, threading, bcrypt, getpass
 #TODO Add store freinds to config.json
 #TODO if a username already exists do not create a new one
 #TODO add create data folder and config.json file
-#TODO Add check that data/message has been received and if not resolve
+
+#Add check that data/message has been received and if not resolve
+#TODO PART 1: Add received messages to everything
+#TODO PART 2: Check that they have been received
+#TODO PART 3: If they haven't been received resolve
 
 config_file = 'data/config.json'
 branch = "dev"
@@ -161,16 +165,10 @@ class Client:
                     print('Cannot connect to server')
                     break
             else:
-                #TODO Make it handle this better than just closing the program
-                print("Server has shutdown closing client")
+                #When server stops, closes all loops and return to menu
                 self.handler_loop = False
-                self.tcp_sock.shutdown(0)
-                self.tcp_sock.close()
                 self.mesg_loop = False
-                sys.exit("Client closing")
-                quit()
-        
-        self.menu()
+
 
     #sends message to server based on username of recipient who is set as target
     def send_mesg(self):
@@ -242,42 +240,43 @@ class Client:
     
     #user menu dislayed at start up
     def menu(self):
-        self.handler_thread = threading.Thread(target = self.handler)
-        self.handler_thread.daemon = True
-        self.handler_thread.start()
-        print("commands:\n1: start chat\n2: edit username\n0: exit")
-        cmd = reg_input("enter command: ", int)
-        if(cmd =="1"):
-            #starts message input on seperate thread
-            self.send_mesg()
-         
-        elif(cmd == "2"):
-            #TODO Fully impellent changing username
-            #If this is changed after the user has already connected to the server it will need to be changed there as well
-            self.__username = reg_input("enter username:   ", str)
-            pass
-        elif(cmd =="0"):
-            try:
-                time_sent =datetime.now().strftime("%H:%m")
-
-                data = {
-                    'target':"server",
-                    'status':'disconnecting',
-                    'time_sent':str(time_sent),
-                    'sender':self.__username
-                    }
-
-                data = js.dumps(data)
-                self.tcp_sock.send(bytes(data,encoding='utf-8'))
-
-                self.tcp_sock.shutdown(0)
-                self.tcp_sock.close()
-            except OSError:
+        while True:
+            self.handler_thread = threading.Thread(target = self.handler)
+            self.handler_thread.daemon = True
+            self.handler_thread.start()
+            print("Commands:\n1: start chat\n2: edit username\n0: exit")
+            cmd = reg_input("enter command: ", int)
+            if(cmd =="1"):
+                #starts message input on seperate thread
+                self.send_mesg()
+            
+            elif(cmd == "2"):
+                #TODO Fully impellent changing username
+                #If this is changed after the user has already connected to the server it will need to be changed there as well
+                self.__username = reg_input("enter username:   ", str)
                 pass
-            sys.exit("Client closing")
-            quit()
-        else:
-            print("Invalid command")
+            elif(cmd =="0"):
+                try:
+                    time_sent =datetime.now().strftime("%H:%m")
+
+                    data = {
+                        'target':"server",
+                        'status':'disconnecting',
+                        'time_sent':str(time_sent),
+                        'sender':self.__username
+                        }
+
+                    data = js.dumps(data)
+                    self.tcp_sock.send(bytes(data,encoding='utf-8'))
+
+                    self.tcp_sock.shutdown(0)
+                    self.tcp_sock.close()
+                except OSError:
+                    pass
+                sys.exit("Client closing")
+                quit()
+            else:
+                print("Invalid command")
 
     #if users is not found in config.json, creates username
     def create_user(self):
@@ -431,7 +430,12 @@ class Client:
             'sender':self.__username
             }
         data = js.dumps(data)
-        self.tcp_sock.send(bytes(data,encoding='utf-8'))
+        try:
+            self.tcp_sock.send(bytes(data,encoding='utf-8'))
+        except:
+            print("Server is currently closed")
+            self.handler_loop = False
+            self.mesg_loop = False
 
     def decrypt(self, message, sender, nonce):
         if(sender != "server"):
