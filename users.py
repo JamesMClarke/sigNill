@@ -19,6 +19,7 @@ class Users:
                 return u.get_connection()
             else:
                 print("no user")
+        return False
             
     #Returns a list of usernames
     def get_all_usernames(self):

@@ -5,6 +5,7 @@ from key import Key
 from os import error, mkdir
 from users import Users
 from tools import reg_input
+from time import sleep
 import socket, errno,threading, sys, logging, bcrypt, os
 
 
@@ -38,9 +39,9 @@ class Server:
     
 
     def handler(self,c,a):
-
+        handlerloop = True
         username = ""
-        while True:
+        while handlerloop:
             #loads data json object sent by client
             data = c.recv(self.buf_size)
             logging.debug("Server receive %s at %s"%(data, datetime.now().strftime("%H:%m")))
@@ -57,14 +58,28 @@ class Server:
                             if(data['status'] == "connected"):
                                 #TODO save username salt and password to server json file
                                 #TODO add compare function for already existing user
-                                #TODO Check if a user is already connected with that account name
                                 username = data["sender"] 
-                                salt =  data["data"]
-                                print(salt)
-                                self.check_user(username,salt,reg_users_file)                       
-                                self.users.add_user(username, c)
-                                print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
-                                logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+                                if(not self.users.find_conn_by_name(username)):
+                                    salt =  data["data"]
+                                    print(salt)
+                                    self.check_user(username,salt,reg_users_file)                       
+                                    self.users.add_user(username, c)
+                                    print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                                    logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
+                                else:
+                                    print("User '%s' already connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                                    logging.debug("User '%s' already connected at %s"%(username, datetime.now().strftime("%H:%m")))
+                                    data = {
+                                        'target':username,
+                                        'status':"User "+username+" already connected",
+                                        'time_sent':str(datetime.now().strftime("%H:%m")),
+                                        'sender':"server"
+                                        }
+                                    data = js.dumps(data)
+                                    print(data)
+                                    c.send(bytes(data,encoding='utf-8'))
+                                    handlerloop = False
+                                    #TODO Handle this better than just giving ConnectionResetError
 
                         #If the data includes P and G then generate public key and send it back
                         elif('p' in data and 'g' in data):
@@ -89,7 +104,7 @@ class Server:
                             if(not key.shared_set()):
                                 key.generate_shared(data['key'])
                                 print(key.get_shared())
-                                
+
                         #If the message is encrypted
                         elif('nonce' in data):
                             if("message" in data):
@@ -101,8 +116,9 @@ class Server:
                 print("User '%s' disconnected at %s"%(username, datetime.now().strftime("%H:%m")))
                 logging.debug("User '%s' disconnected at %s"%(username, datetime.now().strftime("%H:%m")))
                 self.users.remove_by_name(username)
-                c.close()
-                break
+                handlerloop = False
+        sleep(5)
+        c.close()
 
     def kick(self, username):
         conn = self.users.find_conn_by_name(username)
