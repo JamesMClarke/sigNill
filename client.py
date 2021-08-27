@@ -6,7 +6,7 @@ from datetime import datetime
 from tools import reg_input
 from keys import Keys
 from key import Key
-import itertools, sys, socket, threading, bcrypt, getpass
+import itertools, sys, socket, threading, bcrypt, getpass, os
 
 #TODO Store shared key after it has been generated maybe
 #TODO Add text colour from config json
@@ -35,10 +35,18 @@ class Client:
     server_key = Key('server')
 
     def __init__(self):
+
+
+        
         #initializes connection variables
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
         self.buff_size = 2048
+        #checks if data dir exists and created dir and config if not found
+        if(not os.path.isdir('data')):
+            os.mkdir('data')
+            file =open("data/config.json")
+            file.close()
         
         self.load_user_config(config_file)
 
@@ -314,7 +322,8 @@ class Client:
         if(branch != "dev"):
             self.save_to_config(config_file)
         else:
-            print("client in dev mode not saving client")
+            
+            print("client in dev mode not saving client\nUser:",self.__username)
 
      
     #loads user config infomation, if username not found in config returns null and runs create user
