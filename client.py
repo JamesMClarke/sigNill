@@ -6,6 +6,7 @@ from datetime import datetime
 from tools import reg_input
 from keys import Keys
 from key import Key
+from os.path import exists
 import itertools, sys, socket, threading, bcrypt, getpass, os
 
 #TODO Store shared key after it has been generated maybe
@@ -44,9 +45,8 @@ class Client:
         self.buff_size = 2048
         #checks if data dir exists and created dir and config if not found
         if(not os.path.isdir('data')):
-            os.mkdir('data')
-            file =open("data/config.json")
-            file.close()
+            self.create_config()
+
         
         self.load_user_config(config_file)
 
@@ -358,6 +358,21 @@ class Client:
                 print("user created\nWelcome: ",self.__username)
         except FileNotFoundError:
             print("config not found")
+            
+    def create_config(self):
+        os.mkdir('data')
+        file_name ="data/config.json"
+        file_exists = exists(file_name)
+        if(file_exists is None):
+            config = {
+                "config": [
+
+                    ]
+                }   
+            with open(file_name,"rw") as file:
+                json_obj = js.dumps(config)
+                file.write(json_obj)
+        
 
     
     #add loading indicator
