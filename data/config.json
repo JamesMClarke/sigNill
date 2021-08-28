@@ -1,9 +1,5 @@
 {
     "config": [
-        {
-            "username": "b",
-            "salt": "$2b$16$FHKZSfoyhTiUBuhkxSFlWu",
-            "hashpwd": "$2b$16$FHKZSfoyhTiUBuhkxSFlWueL7Lzz9amNeMeUehCLTlygQ4h6FHUhO"
-        }
+     
     ]
 }

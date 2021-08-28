@@ -306,7 +306,7 @@ class Client:
         self.hashed_password = (self.hash_pwd(__password))
 
         #dosent save to config if dev
-        if(branch == "dev"):
+        if(branch != "dev"):
             self.save_to_config(config_file)
         else:
             
@@ -326,6 +326,7 @@ class Client:
                 elif("username"  in data[0]):
                     self.__username = data[0]['username'] 
                     self.__salt = data[0]['salt']
+                    self.__hashed_pwd = data[0]['hashpwd']
                     print("Welcome: ",self.__username) 
                     
                
@@ -385,11 +386,10 @@ class Client:
         self.loading_str = "hashing password: "        
         password.encode("utf-8")
         self.__salt = bcrypt.gensalt(rounds=16)
-        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
+        self.__hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
         self.complete = True
 
         
-        return hashed_pwd
 
     def compare_pwd(self,__salt,__hashed_pwd,__password):
             __allow_user_login = False
