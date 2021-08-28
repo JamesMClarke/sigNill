@@ -1,5 +1,5 @@
 from re import I
-from time import gmtime, sleep
+from time import gmtime, sleep,time
 from key import Key
 import json as js
 from datetime import datetime
@@ -13,8 +13,8 @@ import itertools, sys, socket, threading, bcrypt, getpass, os
 #TODO Add text colour from config json
 #TODO Add choose text colour 
 #TODO Add store freinds to config.json
-#TODO if a username already exists do not create a new one
-#TODO add create data folder and config.json file
+#TODO if user already exists renter and hash pwd against stored hashed pwd, if 
+# succesful connect to server send hashed pwd if match allow connect if not disconnects
 
 #Add check that data/message has been received and if not resolve
 #TODO PART 1: Add received messages to everything
@@ -51,6 +51,7 @@ class Client:
         self.load_user_config(config_file)
 
         self.connect_to_server()
+        #self.encrypt_salt_pwd()
         self.menu()
        
     #sends username to server to be added to server users list
@@ -60,9 +61,9 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
-            'data':str(self.__salt,encoding='utf-8'),
+            #'data':str(self.__salt,encoding='utf-8'),
+            #'data_2':str(self.hashed_password,encoding='utf-8'),
             'sender':self.__username
-            #'salt':str(self.salt)
         }
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))
@@ -231,20 +232,6 @@ class Client:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             self.send_user_data()
             print("connected to server")
-
-    #method to encrypt mesg
-    def encrypt_mesg(self,mesg):
-        encrypted = True
-        spinner = itertools.cycle(['-','/','|','\\'])
-        while encrypted == False:
-            #shows loading spinner while message is being encrypted
-            sys.stdout.write(next(spinner))
-            sys.stdout.flush()
-            sys.stdout.write('\b')
-
-            #encrypt message here
-            encrypted == True
-        pass
     
     #user menu dislayed at start up
     def menu(self):
@@ -319,7 +306,7 @@ class Client:
         self.hashed_password = (self.hash_pwd(__password))
 
         #dosent save to config if dev
-        if(branch != "dev"):
+        if(branch == "dev"):
             self.save_to_config(config_file)
         else:
             
@@ -347,7 +334,7 @@ class Client:
 
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.__username,"salt":str(self.salt,encoding='utf-8')}
+        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashpwd":str(self.hashed_password,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:
@@ -358,7 +345,7 @@ class Client:
                 print("user created\nWelcome: ",self.__username)
         except FileNotFoundError:
             print("config not found")
-            
+
     def create_config(self):
         os.mkdir('data')
         file_name ="data/config.json"
@@ -373,13 +360,34 @@ class Client:
                 json_obj = js.dumps(config)
                 file.write(json_obj)
         
-
+    def encrypt_salt_pwd(self):
+        e_pwd,e_salt = self.server_key.encrypt(self.hashed_password,self.__salt)
+        print(e_pwd,e_salt)
+        pass
     
+    def loading(self,loading_str):
+        chars = "/-\|"
+        while self.complete == False:
+            for char in chars:
+                sys.stdout.write('\r'+loading_str+str(char))
+                sleep(0.15)
+                sys.stdout.flush()
+
+            if self.complete == True:
+                    sys.stdout.write("\rdone")
+                    break
+
+
+
     #add loading indicator
-    def hash_pwd(self,password):        
+    def hash_pwd(self,password):
+        self.complete = False
+        self.loading_str = "hashing password: "        
         password.encode("utf-8")
         self.__salt = bcrypt.gensalt(rounds=16)
         hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
+        self.complete = True
+
         
         return hashed_pwd
 

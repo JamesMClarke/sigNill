@@ -55,13 +55,13 @@ class Server:
                     if(target == "server"):
                         if('status' in data):
                             if(data['status'] == "connected"):
-                                #TODO save username salt and password to server json file
-                                #TODO add compare function for already existing user
                                 username = data["sender"] 
                                 if(not self.users.find_conn_by_name(username)):
-                                    salt =  data["data"]
-                                    print(salt)
-                                    self.check_user(username,salt,reg_users_file)                       
+                                    #salt =  data["data"]
+                                    #hashed_pwd = data["data_2"]
+                                    #print("salt and hash pwd",salt,hashed_pwd)
+                                    #checks if user already added if they are runs pwd comapre if not adds
+                                    #self.check_user(username,salt,hashed_pwd,reg_users_file)                       
                                     self.users.add_user(username, c)
                                     print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                                     logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
@@ -190,25 +190,31 @@ class Server:
             else:
                 print("Please enter a valid command")
 
-
+    #TODO if user is already in reg_user send reply saying that username is already taken
     #checks if user is in reg_user.json   
-    def check_user(self,username,salt,file):
+    def check_user(self,username,salt,hashed_pwd,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data["registered_users"]
-                #if data is empty add user
+                salt = self.key.decrypt(salt)
+                pwd = self.decrypt(hashed_pwd)
+                print("decyrted pwd and salt:",pwd,":",salt)
+                #if reg_users.json is empty add user
                 if (len(data) == 0):
                     self.save_user_to_server_config(username,salt,reg_users_file)
 
                 for i in data:
                     print(len(data))
+                    #if the username not equal username is reg_user.json adds users
                     if (username  != i["username"]):
                         #self.save_user_to_server_config(username,salt,reg_users_file)
-                        print("user nto registered")
+                        print("User not registered\n Adding users")
 
                     elif (username ==  i["username"]):
-                        print("user already registered")                   
+                        self.c
+                        print("User already registered")
+                        #def check user_pwd                    
         
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
