@@ -315,8 +315,7 @@ class Client:
             print("client in dev mode not saving client\nUser:",self.__username)
 
      
-    #loads user config infomation, if username not found in config returns null and runs create user
-    #TODO seperate into load_username and load_password
+    #loads config into memory
     def load_user_config(self,file):
         try: 
             with open (file,"r") as read_file:
@@ -327,32 +326,36 @@ class Client:
         except FileNotFoundError: 
             print("config.json not found")
 
-
+    #loads username from config if username None creates user
     def load_username(self,data):
+        
         if (len(data)==0):    
-
                 print("No user found: Creating User")
                 self.create_user()
-                #if username in config set self.username to that
+
+        #if username in config.json self.username value is set to that
         for i in data:
             if(i['username']):
-                #pwd = getpass.getpass("enter password")
-                #password = self.hash_pwd(pwd)
-                #if(password== i['hashpwd']):
-
                 self.__username = i['username'] 
-                #self.__salt = i['salt']
-                #self.__hashed_pwd  = i['hashpwd']
                 print("Welcome: ",self.__username) 
-                
+
         self.load_password(data)
 
    
     #loads password
     def load_password(self,data):
+        
         for i in data:
             if(i['username']==self.__username):
                 self.hashed_password = i['hashed_pwd']
+    
+    #loads salt
+    def load_salt(self,data):
+
+        for i in data:
+            if(i['username']==self.__username):
+                self.__salt = i['salt']
+
 
    
     # if no user in config saves username to config
