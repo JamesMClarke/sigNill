@@ -414,7 +414,8 @@ class Client:
 
         data = js.dumps(data)
         self.tcp_sock.send()
-
+        
+    #TODO seperate into send salt and send pwd functions
     #user client login send encrypted salt and hashed_pwd for user reg
     def reg_user(self):
         print("test")
