@@ -67,6 +67,7 @@ class Client:
 
         #Creates a key for the server
         self.create_key("server")
+
         #Wait for server to send public key back?
 
 
@@ -118,6 +119,7 @@ class Client:
                                 if(not key.shared_set()):
                                     key.generate_shared(data['key'])
                                     print(key.get_shared())
+
 
                 elif ('p' in data):
                         #Check if a user with that name is already in keys
@@ -296,7 +298,14 @@ class Client:
                 password_match = True
          
         #passes password to be hashed       
+        loading = threading.Thread(target=self.loading_animation)
+        self.loading_str = "hashing pwd: "
+        self.complete = False
+        loading.start()
         self.hashed_password = (self.hash_pwd(__password))
+        self.complete = True
+        loading.join()
+
 
         #dosent save to config if dev
         if(branch != "dev"):
@@ -322,6 +331,7 @@ class Client:
                         self.__username = i['username'] 
                         self.__salt = i['salt']
                         self.__hashed_pwd  = i['hashpwd']
+                        #put encrypt salt,hash here
                         print("Welcome: ",self.__username) 
 
         except FileNotFoundError: 
@@ -355,12 +365,8 @@ class Client:
                 json_obj = js.dumps(config)
                 file.write(json_obj)
         
-    def encrypt_salt_pwd(self):
-        e_pwd,e_salt = self.server_key.encrypt(self.hashed_password,self.__salt)
-        print(e_pwd,e_salt)
-        pass
-    
-    def loading(self):
+  
+    def loading_animation(self):
         chars = "/-\|"
         while self.complete == False:
             for char in chars:
@@ -370,7 +376,6 @@ class Client:
 
             if self.complete == True:
                     sys.stdout.write("\rdone")
-                    self.loading_indicator.join()
                     break
 
 
@@ -409,7 +414,7 @@ class Client:
             #Gen public key
             sleep(1)
             public_key = key.generate_public_key().decode('utf-8')
-            print(public_key)
+            print("public key",public_key)
             #Send public key
             self.send_public_key(public_key,target)
             
@@ -473,7 +478,10 @@ class Client:
         return plaintext
 
 
-
+    def send_pwd_salt_to_server(self):
+        ciphertext, nonce = self.server_key.encrypt(self.__salt)
+        print("salt encrypt test",ciphertext)
+        pass
            
 if __name__ == "__main__":
     main()
