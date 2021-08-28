@@ -274,6 +274,7 @@ class Client:
 
     #if users is not found in config.json, creates username
     def create_user(self):
+        #on create_user, encrypt salt and hashed password and send to server
         password_match = False
         self.__username = reg_input("enter username:   ", str)
         if (self.__username ==""):
@@ -299,7 +300,7 @@ class Client:
          
         #passes password to be hashed       
         loading = threading.Thread(target=self.loading_animation)
-        self.loading_str = "hashing pwd: "
+        self.loading_str = "hashing password: "
         self.complete = False
         loading.start()
         self.hashed_password = (self.hash_pwd(__password))
@@ -328,11 +329,15 @@ class Client:
                 
                 for i in data:
                     if(i['username']):
-                        self.__username = i['username'] 
-                        self.__salt = i['salt']
-                        self.__hashed_pwd  = i['hashpwd']
-                        #put encrypt salt,hash here
-                        print("Welcome: ",self.__username) 
+                        pwd = getpass.getpass("enter password")
+                        password = self.hash_pwd(pwd)
+                        if(password== i['hashpwd']):
+
+                            self.__username = i['username'] 
+                            self.__salt = i['salt']
+                            self.__hashed_pwd  = i['hashpwd']
+                            #put encrypt salt,hash here
+                            print("Welcome: ",self.__username) 
 
         except FileNotFoundError: 
             print("error in config")
@@ -371,14 +376,43 @@ class Client:
         while self.complete == False:
             for char in chars:
                 sys.stdout.write('\r'+self.loading_str+str(char))
-                sleep(0.15)
+                sleep(0.12)
                 sys.stdout.flush()
 
             if self.complete == True:
+                    sys.stdout.flush()
                     sys.stdout.write("\rdone")
                     break
 
+    #user client login send encrypted non hashed_pwd
+    def user_login(self):
+        ciphertext,nonce = self.server_key.encrypt(self.__hashed_pwd)
 
+        data = {
+            'target':'server',
+            'pwd':ciphertext.decode('utf-8'),
+            'nonce':nonce.decode('utf-8'),
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':self.__username
+            }
+
+        data = js.dumps(data)
+        self.tcp_sock.send()
+
+    #user client login send encrypted salt and hashed_pwd for user reg
+    def reg_user(self):
+        pwd,nonce = self.server_key.encrypt(self.hashed_password)
+        salt,nonce2 = self.server_key.encrypt(self.__salt)
+
+        data = {
+            'target':'server',
+            'pwd':pwd.decode('utf-8'),
+            'nonce':nonce.decode('utf-8'),
+            'salt':salt.decode('utf-8'),
+            'nonce':nonce2.decode('utf-8'),
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':self.__username
+            }
 
     #add loading indicator
     def hash_pwd(self,password):
@@ -414,7 +448,7 @@ class Client:
             #Gen public key
             sleep(1)
             public_key = key.generate_public_key().decode('utf-8')
-            print("public key",public_key)
+            print(public_key)
             #Send public key
             self.send_public_key(public_key,target)
             
@@ -477,11 +511,6 @@ class Client:
         plaintext = plaintext.decode('utf-8')
         return plaintext
 
-
-    def send_pwd_salt_to_server(self):
-        ciphertext, nonce = self.server_key.encrypt(self.__salt)
-        print("salt encrypt test",ciphertext)
-        pass
            
 if __name__ == "__main__":
     main()
