@@ -319,23 +319,24 @@ class Client:
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data['config']
+                
                 if (len(data)==0):                                          
                     print("No user found: Creating User")
                     self.create_user()
                 
-                elif("username"  in data[0]):
-                    self.__username = data[0]['username'] 
-                    self.__salt = data[0]['salt']
-                    self.__hashed_pwd = data[0]['hashpwd']
-                    print("Welcome: ",self.__username) 
-                    
-               
+                for i in data:
+                    if(i['username']):
+                        self.__username = i['username'] 
+                        self.__salt = i['salt']
+                        self.__hashed_pwd  = i['hashpwd']
+                        print("Welcome: ",self.__username) 
+
         except FileNotFoundError: 
             print("error in config")
 
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashpwd":str(self.hashed_password,encoding='utf-8')}
+        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashpwd":str(self.__hashed_pwd,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:
