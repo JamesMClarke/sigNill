@@ -89,6 +89,7 @@ class Client:
                             if("message" in data):
                                 message = self.decrypt(data["message"], sender, data["nonce"])
                                 print(sender,": ",message)
+                                self.received_receipt(sender,"message")
 
                             #If P and G are in the message
                             elif ('p' in data):
@@ -97,7 +98,10 @@ class Client:
                             #If the keys in the message
                             elif('key' in data):
                                 self.gen_shared(data)
-                              
+                            
+                            #Handels received receipts
+                            elif('received' in data):
+                                print("The %s was received"%(data['received']))
 
                 #Handels gening public for server
                 elif ('p' in data):
@@ -121,6 +125,8 @@ class Client:
                         quit()
                     else:
                         print(data['status'])
+                
+                
 
                 if not data:
                     print('Cannot connect to server')
@@ -506,6 +512,17 @@ class Client:
             #Generate and send public key
             public_key = key.generate_public_key().decode('utf-8')
             self.send_public_key(public_key, data['sender'])
+
+    #Creates and sends a received receipt back to the sender
+    def received_receipt(self, sender, type):
+        receipt = {
+            'target':sender,
+            'received':type,
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':self.__username
+            }
+        data = js.dumps(receipt)
+        self.send_to_server(data)
 
            
 if __name__ == "__main__":

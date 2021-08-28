@@ -108,6 +108,11 @@ class Server:
                         elif('nonce' in data):
                             if("message" in data):
                                 self.forward(data['message'],data['nonce'],data['sender'])
+                        
+                        #Handels received receipts
+                        #TODO Implement handleing received receipts for server
+                        elif('received' in data):
+                            print("The %s was received"%(data['received']))
 
             # if no data connection lost client connection closed close
             else:
