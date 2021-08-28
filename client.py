@@ -58,8 +58,6 @@ class Client:
         data = {
             'target':"server",
             'status':"connected",
-            #'data':str(self.__salt,encoding='utf-8'),
-            #'data_2':str(self.hashed_password,encoding='utf-8'),
             'sender':self.__username
         }
         data = js.dumps(data)
@@ -67,7 +65,6 @@ class Client:
 
         #Creates a key for the server
         self.create_key("server")
-
         #Wait for server to send public key back?
 
 
@@ -118,7 +115,8 @@ class Client:
                                 #Generate shaired key
                                 if(not key.shared_set()):
                                     key.generate_shared(data['key'])
-                                    print(key.get_shared())
+                                    print("shared key",key.get_shared())
+                              
 
 
                 elif ('p' in data):
@@ -153,6 +151,7 @@ class Client:
                         }
                     data = js.dumps(data)
                     self.tcp_sock.send(bytes(data,encoding='utf-8'))
+
                     
                     
                 elif ('status' in data):
@@ -317,34 +316,48 @@ class Client:
 
      
     #loads user config infomation, if username not found in config returns null and runs create user
+    #TODO seperate into load_username and load_password
     def load_user_config(self,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data['config']
-                
-                if (len(data)==0):                                          
-                    print("No user found: Creating User")
-                    self.create_user()
-                
-                for i in data:
-                    if(i['username']):
-                        pwd = getpass.getpass("enter password")
-                        password = self.hash_pwd(pwd)
-                        if(password== i['hashpwd']):
-
-                            self.__username = i['username'] 
-                            self.__salt = i['salt']
-                            self.__hashed_pwd  = i['hashpwd']
-                            #put encrypt salt,hash here
-                            print("Welcome: ",self.__username) 
+                self.load_username(data)
 
         except FileNotFoundError: 
-            print("error in config")
+            print("config.json not found")
 
+
+    def load_username(self,data):
+        if (len(data)==0):    
+
+                print("No user found: Creating User")
+                self.create_user()
+                #if username in config set self.username to that
+        for i in data:
+            if(i['username']):
+                #pwd = getpass.getpass("enter password")
+                #password = self.hash_pwd(pwd)
+                #if(password== i['hashpwd']):
+
+                self.__username = i['username'] 
+                #self.__salt = i['salt']
+                #self.__hashed_pwd  = i['hashpwd']
+                print("Welcome: ",self.__username) 
+                
+        self.load_password(data)
+
+   
+    #loads password
+    def load_password(self,data):
+        for i in data:
+            if(i['username']==self.__username):
+                self.hashed_password = i['hashed_pwd']
+
+   
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashpwd":str(self.__hashed_pwd,encoding='utf-8')}
+        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashed_pwd":str(self.__hashed_pwd,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:
@@ -401,18 +414,21 @@ class Client:
 
     #user client login send encrypted salt and hashed_pwd for user reg
     def reg_user(self):
+        print("test")
         pwd,nonce = self.server_key.encrypt(self.hashed_password)
-        salt,nonce2 = self.server_key.encrypt(self.__salt)
+        #salt,nonce2 = self.server_key.encrypt(self.__salt)
 
         data = {
             'target':'server',
             'pwd':pwd.decode('utf-8'),
             'nonce':nonce.decode('utf-8'),
-            'salt':salt.decode('utf-8'),
-            'nonce':nonce2.decode('utf-8'),
+            #'salt':salt.decode('utf-8'),
+            #'nonce':nonce2.decode('utf-8'),
             'time_sent':str(datetime.now().strftime("%H:%m")),
             'sender':self.__username
             }
+        print("encrypted pwd and salt",js.dumps(data))
+        print("pwd is",pwd)
 
     #add loading indicator
     def hash_pwd(self,password):
