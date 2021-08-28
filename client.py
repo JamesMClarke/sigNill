@@ -49,14 +49,11 @@ class Client:
 
         
         self.load_user_config(config_file)
-
         self.connect_to_server()
-        #self.encrypt_salt_pwd()
         self.menu()
        
     #sends username to server to be added to server users list
     def send_user_data(self):
-        #TODO add hashed password and salt to send 
         #Sends message to the server to say it has connected
         data = {
             'target':"server",
@@ -298,11 +295,7 @@ class Client:
             else:
                 password_match = True
          
-        self.hash_pwd(__password)
-        
-        
-       
-        #passes password to be hashed
+        #passes password to be hashed       
         self.hashed_password = (self.hash_pwd(__password))
 
         #dosent save to config if dev
@@ -367,28 +360,28 @@ class Client:
         print(e_pwd,e_salt)
         pass
     
-    def loading(self,loading_str):
+    def loading(self):
         chars = "/-\|"
         while self.complete == False:
             for char in chars:
-                sys.stdout.write('\r'+loading_str+str(char))
+                sys.stdout.write('\r'+self.loading_str+str(char))
                 sleep(0.15)
                 sys.stdout.flush()
 
             if self.complete == True:
                     sys.stdout.write("\rdone")
+                    self.loading_indicator.join()
                     break
 
 
 
     #add loading indicator
     def hash_pwd(self,password):
-        self.complete = False
-        self.loading_str = "hashing password: "        
         password.encode("utf-8")
         self.__salt = bcrypt.gensalt(rounds=16)
-        self.__hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
-        self.complete = True
+        hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
+
+        return hashed_pwd
 
         
 
