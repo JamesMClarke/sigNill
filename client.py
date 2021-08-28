@@ -36,9 +36,6 @@ class Client:
     server_key = Key('server')
 
     def __init__(self):
-
-
-        
         #initializes connection variables
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
@@ -47,7 +44,6 @@ class Client:
         if(not os.path.isdir('data')):
             self.create_config()
 
-        
         self.load_user_config(config_file)
         self.connect_to_server()
         self.menu()
@@ -96,62 +92,20 @@ class Client:
 
                             #If P and G are in the message
                             elif ('p' in data):
-                                #Check if a user with that name is already in keys
-                                if(self.keys.find_key_by_name(data['sender']) == None):
-                                    #If not create a new key
-                                    key = Key(data['sender'], int(data['p']), int(data['g']))
-                                    self.keys.add_key(key)
-                                    #Generate and send public key
-                                    public_key = key.generate_public_key().decode('utf-8')
-                                    self.send_public_key(public_key, data['sender'])
+                                self.gen_public_from_p_g(data)
 
+                            #If the keys in the message
                             elif('key' in data):
-                                if(data['sender'] == "server"):
-                                    key = self.server_key
-                                else:
-                                    key = self.keys.find_key_by_name(data['sender'])
-                                print(key)
-                                print(data['sender'])
-                                #Generate shaired key
-                                if(not key.shared_set()):
-                                    key.generate_shared(data['key'])
-                                    print("shared key",key.get_shared())
+                                self.gen_shared(data)
                               
 
-
+                #Handels gening public for server
                 elif ('p' in data):
-                        #Check if a user with that name is already in keys
-                        if(self.keys.find_key_by_name(data['sender']) == None):
-                            #If not create a new key
-                            key = Key(data['sender'], int(data['p']), int(data['g']))
-                            self.keys.add_key(key)
-                            #Generate and send public key
-                            public_key = key.generate_public_key().decode('utf-8')
-                            self.send_public_key(public_key, data['sender'])
-
+                    self.gen_public_from_p_g(data)
+                
+                #Handles gening shared key for the server
                 elif('key' in data):
-                    if(data['sender'] == "server"):
-                        key = self.server_key
-                    else:
-                        key = self.keys.find_key_by_name(data['sender'])
-                    print(key)
-                    print(data['sender'])
-                    #Generate shaired key
-                    if(not key.shared_set()):
-                        key.generate_shared(data['key'])
-                        print(key.get_shared())
-
-                    #Sends received receipt
-                    time_sent =datetime.now().strftime("%H:%m")
-                    data = {
-                        'target':data['sender'],
-                        'status':"Message received",
-                        'time_sent':str(time_sent),
-                        'sender': self.__username
-                        }
-                    data = js.dumps(data)
-                    self.tcp_sock.send(bytes(data,encoding='utf-8'))
-
+                    self.gen_shared(data)
                     
                     
                 elif ('status' in data):
@@ -530,6 +484,28 @@ class Client:
         plaintext = key.decrypt(message, nonce)
         plaintext = plaintext.decode('utf-8')
         return plaintext
+    
+    def gen_shared(self, data):
+        if(data['sender'] == "server"):
+            key = self.server_key
+        else:
+            key = self.keys.find_key_by_name(data['sender'])
+        print(key)
+        print(data['sender'])
+        #Generate shaired key
+        if(not key.shared_set()):
+            key.generate_shared(data['key'])
+            print("shared key",key.get_shared())
+    
+    def gen_public_from_p_g(self, data):
+        #Check if a user with that name is already in keys
+        if(self.keys.find_key_by_name(data['sender']) == None):
+            #If not create a new key
+            key = Key(data['sender'], int(data['p']), int(data['g']))
+            self.keys.add_key(key)
+            #Generate and send public key
+            public_key = key.generate_public_key().decode('utf-8')
+            self.send_public_key(public_key, data['sender'])
 
            
 if __name__ == "__main__":

@@ -195,6 +195,7 @@ class Server:
     def check_user(self,username,salt,hashed_pwd,file):
         try: 
             with open (file,"r") as read_file:
+                #TODO Load on startup rather than everytime a user connects
                 data = js.load(read_file)
                 data = data["registered_users"]
                 salt = self.key.decrypt(salt)
