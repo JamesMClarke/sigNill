@@ -232,6 +232,7 @@ class Client:
             else:
                 print("Invalid command")
 
+    #TODO Add reg expression using reg_input for a password
     #if users is not found in config.json, creates username
     def create_user(self):
         #on create_user, encrypt salt and hashed password and send to server
@@ -379,7 +380,8 @@ class Client:
     #TODO seperate into send salt and send pwd functions
     #user client login send encrypted salt and hashed_pwd for user reg
     def reg_user(self):
-        print("test")
+        #Sleep so the shared key can be established before trying to encrypt
+        sleep(1)
         pwd,nonce = self.server_key.encrypt(str(self.hashed_password,encoding='utf-8'))
         print("\n",pwd)
         #salt,nonce2 = self.server_key.encrypt(self.__salt)
@@ -498,12 +500,11 @@ class Client:
             key = self.server_key
         else:
             key = self.keys.find_key_by_name(data['sender'])
-        print(key)
-        print(data['sender'])
         #Generate shaired key
         if(not key.shared_set()):
             key.generate_shared(data['key'])
             print("shared key",key.get_shared())
+            print(key)
     
     def gen_public_from_p_g(self, data):
         #Check if a user with that name is already in keys
