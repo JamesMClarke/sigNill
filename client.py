@@ -197,6 +197,7 @@ class Client:
             self.handler_thread = threading.Thread(target = self.handler)
             self.handler_thread.daemon = True
             self.handler_thread.start()
+            self.reg_user()
             print("Commands:\n1: start chat\n2: edit username\n0: exit")
             cmd = reg_input("enter command: ", int)
             if(cmd =="1"):
@@ -379,7 +380,8 @@ class Client:
     #user client login send encrypted salt and hashed_pwd for user reg
     def reg_user(self):
         print("test")
-        pwd,nonce = self.server_key.encrypt(self.hashed_password)
+        pwd,nonce = self.server_key.encrypt(str(self.hashed_password,encoding='utf-8'))
+        print("\n",pwd)
         #salt,nonce2 = self.server_key.encrypt(self.__salt)
 
         data = {
