@@ -22,7 +22,7 @@ import itertools, sys, socket, threading, bcrypt, getpass, os
 #TODO PART 3: If they haven't been received resolve
 
 config_file = 'data/config.json'
-branch = "prod"
+branch = "dev"
 def main():
     
     client = Client()
@@ -32,6 +32,7 @@ class Client:
     #creates socket 
     tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     __username = ""
+    __salt = ""
     keys = Keys()
     server_key = Key('server')
 
@@ -46,6 +47,13 @@ class Client:
 
         self.load_user_config(config_file)
         self.connect_to_server()
+        self.handler_thread = threading.Thread(target = self.handler)
+        self.handler_thread.daemon = True
+        self.handler_thread.start()
+        #TODO Check if user is already on the server, if not get them to create a password
+        #TODO If user is on server get salt, hash password+salt, and send this back
+        self.send_user()
+        
         self.menu()
        
     #sends username to server to be added to server users list
@@ -193,10 +201,6 @@ class Client:
     #user menu dislayed at start up
     def menu(self):
         while True:
-            self.handler_thread = threading.Thread(target = self.handler)
-            self.handler_thread.daemon = True
-            self.handler_thread.start()
-            self.reg_user()
             print("Commands:\n1: start chat\n2: edit username\n0: exit")
             cmd = reg_input("enter command: ", int)
             if(cmd =="1"):
@@ -231,7 +235,7 @@ class Client:
             else:
                 print("Invalid command")
 
-    #TODO Add reg expression using reg_input for a password
+    
     #if users is not found in config.json, creates username
     def create_user(self):
         #on create_user, encrypt salt and hashed password and send to server
@@ -248,6 +252,8 @@ class Client:
             else:
                 valid = True
 
+    #TODO Add reg expression using reg_input for a password
+    def create_password(self):
         while password_match == False:
             __password = getpass.getpass("enter password:   ")
             __password2 = getpass.getpass("renter password: ")
@@ -289,8 +295,7 @@ class Client:
 
     #loads username from config if username None creates user
     def load_username(self,data):
-        
-        if (len(data)==0):    
+        if (len(data)==0 or branch=="dev"):    
                 print("No user found: Creating User")
                 self.create_user()
 
@@ -299,12 +304,6 @@ class Client:
             if(i['username']):
                 self.__username = i['username'] 
                 print("Welcome: ",self.__username) 
-    
-    #loads salt
-    def load_salt(self,data):
-
-        for i in data:
-            if(i['username']==self.__username):
                 self.__salt = i['salt']
    
     # if no user in config saves username to config
@@ -363,10 +362,10 @@ class Client:
 
         data = js.dumps(data)
         self.tcp_sock.send()
-        
-    #TODO seperate into send salt and send pwd functions
+    
+
     #user client login send encrypted salt and hashed_pwd for user reg
-    def reg_user(self):
+    def send_user(self):
         #Sleep so the shared key can be established before trying to encrypt
         sleep(1)
         pwd,nonce = self.server_key.encrypt(str(self.hashed_password,encoding='utf-8'))
