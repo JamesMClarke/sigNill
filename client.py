@@ -13,8 +13,6 @@ import itertools, sys, socket, threading, bcrypt, getpass, os
 #TODO Add text colour from config json
 #TODO Add choose text colour 
 #TODO Add store freinds to config.json
-#TODO if user already exists renter and hash pwd against stored hashed pwd, if 
-# succesful connect to server send hashed pwd if match allow connect if not disconnects
 
 #Add check that data/message has been received and if not resolve
 #TODO PART 1: Add received messages to everything
@@ -52,6 +50,7 @@ class Client:
         self.handler_thread.start()
         #TODO Check if user is already on the server, if not get them to create a password
         #TODO If user is on server get salt, hash password+salt, and send this back
+        #TODO Once a user logs in store a token rather than their hashed password
         self.send_user()
         
         self.menu()
