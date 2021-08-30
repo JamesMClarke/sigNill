@@ -1,5 +1,8 @@
 {
     "config": [
-     
+        {
+            "username": "Bob",
+            "salt": "$2b$16$GxByRUAAP6Bw4ewW6/q/5u"
+        }
     ]
 }

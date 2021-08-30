@@ -22,7 +22,7 @@ import itertools, sys, socket, threading, bcrypt, getpass, os
 #TODO PART 3: If they haven't been received resolve
 
 config_file = 'data/config.json'
-branch = "dev"
+branch = "prod"
 def main():
     
     client = Client()
@@ -126,7 +126,6 @@ class Client:
                     else:
                         print(data['status'])
                 
-                
 
                 if not data:
                     print('Cannot connect to server')
@@ -185,11 +184,11 @@ class Client:
             print("connected to server")
 
         except socket.error as error:
-            print("using alt port")
+            print("Using alt port")
             self.tcp_port = 10080
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
             self.send_user_data()
-            print("connected to server")
+            print("Connected to server")
     
     #user menu dislayed at start up
     def menu(self):
@@ -300,16 +299,6 @@ class Client:
             if(i['username']):
                 self.__username = i['username'] 
                 print("Welcome: ",self.__username) 
-
-        self.load_password(data)
-
-   
-    #loads password
-    def load_password(self,data):
-        
-        for i in data:
-            if(i['username']==self.__username):
-                self.hashed_password = i['hashed_pwd']
     
     #loads salt
     def load_salt(self,data):
@@ -317,12 +306,10 @@ class Client:
         for i in data:
             if(i['username']==self.__username):
                 self.__salt = i['salt']
-
-
    
     # if no user in config saves username to config
     def save_to_config(self,file):
-        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8'),"hashed_pwd":str(self.__hashed_pwd,encoding='utf-8')}
+        js_obj ={"username":self.__username,"salt":str(self.__salt,encoding='utf-8')}
 
         try:
             with open(file,"r+") as file:
