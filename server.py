@@ -113,10 +113,9 @@ class Server:
                             #recives password registeration
                         if((("nonce" in data) and ("r_pwd" in data) and ("r_salt" in data))):
                             client_name = data["sender"]
-                            password = self.decrypt(data["r_pwd"], data["sender"], data['nonce'])
-                            salt = self.decrypt(data["r_salt"], data["sender"], data['nonce2'])
-                            print("password",password,"salt",salt)
-                            self.check_user(client_name,salt,password,reg_users_file)
+                            self.password = self.decrypt(data["r_pwd"], data["sender"], data['nonce'])
+                            self.salt = self.decrypt(data["r_salt"], data["sender"], data['nonce2'])
+                            self.check_user(client_name,reg_users_file)
 
                             
                              
@@ -209,25 +208,25 @@ class Server:
 
     #TODO if user is already in reg_user send reply saying that username is already taken
     #checks if user is in reg_user.json   
-    def check_user(self,username,salt,password,file):
+    def check_user(self,username,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data["registered_users"]
                 if (len(data) == 0):
                     print("record emptpy:  Adding user")
-                    self.save_user_to_server_config(username,salt,password,reg_users_file)
+                    self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
                 
                 for i in data:
                     print(len(data))
                     #if the username not equal username or data length is 0 adds users
                     if(username  != i["username"]):
-                        print("User not registered\n Adding users")
-                        self.save_user_to_server_config(username,salt,password,reg_users_file)
+                        print("User not registered: Adding users")
+                        self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
 
                     elif (username ==  i["username"]):
-                        self.c
                         print("User already registered")
+                        #send message to client that username is already taken
         
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
