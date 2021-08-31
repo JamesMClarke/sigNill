@@ -1,0 +1,9 @@
+{
+    "registered_users": [
+        {
+            "username": "bob",
+            "salt": "$2b$16$Acx.ev.zNmP0xYTzf87JZe",
+            "password": "$2b$16$Acx.ev.zNmP0xYTzf87JZeEZX.A5.lh.SPVVbb/u3zmlSUCdF3Y3O"
+        }
+    ]
+}

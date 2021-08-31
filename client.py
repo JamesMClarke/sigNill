@@ -13,6 +13,7 @@ import itertools, sys, socket, threading, bcrypt, getpass, os
 #TODO Add text colour from config json
 #TODO Add choose text colour 
 #TODO Add store freinds to config.json
+#TODO FIX BUG: sender of message cannot see reply
 
 #Add check that data/message has been received and if not resolve
 #TODO PART 1: Add received messages to everything
@@ -238,7 +239,6 @@ class Client:
     #if users is not found in config.json, creates username
     def create_user(self):
         #on create_user, encrypt salt and hashed password and send to server
-        password_match = False
         self.__username = reg_input("enter username:   ", str)
         if (self.__username ==""):
                 self.__username = reg_input("enter username:   ", str)
@@ -250,9 +250,12 @@ class Client:
                 self.__username = reg_input("enter username:   ", str)
             else:
                 valid = True
+                self.create_password()
 
     #TODO Add reg expression using reg_input for a password
     def create_password(self):
+
+        password_match = False
         while password_match == False:
             __password = getpass.getpass("enter password:   ")
             __password2 = getpass.getpass("renter password: ")
@@ -268,7 +271,7 @@ class Client:
         self.loading_str = "hashing password: "
         self.complete = False
         loading.start()
-        self.hashed_password = (self.hash_pwd(__password))
+        self.hashed_password = (str(self.hash_password_func(__password),encoding='utf-8'))
         self.complete = True
         loading.join()
 
@@ -304,6 +307,7 @@ class Client:
                 self.__username = i['username'] 
                 print("Welcome: ",self.__username) 
                 self.__salt = i['salt']
+                self.__password = getpass.getpass
    
     # if no user in config saves username to config
     def save_to_config(self,file):
@@ -349,59 +353,53 @@ class Client:
 
     #user client login send encrypted non hashed_pwd
     def user_login(self):
-        ciphertext,nonce = self.server_key.encrypt(self.__hashed_pwd)
+        password_to_send = bcrypt.hashpw(self.__password,self.__salt)
+        ciphertext,nonce = self.server_key.encrypt(password_to_send)
 
         data = {
             'target':'server',
-            'pwd':ciphertext.decode('utf-8'),
+            'l_pwd':ciphertext.decode('utf-8'),
             'nonce':nonce.decode('utf-8'),
             'time_sent':str(datetime.now().strftime("%H:%m")),
             'sender':self.__username
             }
 
         data = js.dumps(data)
-        self.tcp_sock.send()
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))
     
 
     #user client login send encrypted salt and hashed_pwd for user reg
     def send_user(self):
         #Sleep so the shared key can be established before trying to encrypt
         sleep(1)
-        pwd,nonce = self.server_key.encrypt(str(self.hashed_password,encoding='utf-8'))
+        pwd,nonce = self.server_key.encrypt(self.hashed_password)
         print("\n",pwd)
-        #salt,nonce2 = self.server_key.encrypt(self.__salt)
+        salt,nonce2 = self.server_key.encrypt(self.__salt)
 
         data = {
             'target':'server',
-            'pwd':pwd.decode('utf-8'),
+            'r_pwd':pwd.decode('utf-8'),
             'nonce':nonce.decode('utf-8'),
-            #'salt':salt.decode('utf-8'),
-            #'nonce':nonce2.decode('utf-8'),
+            'r_salt':salt.decode('utf-8'),
+            'nonce2':nonce2.decode('utf-8'),
             'time_sent':str(datetime.now().strftime("%H:%m")),
             'sender':self.__username
             }
-        print("encrypted pwd and salt",js.dumps(data))
-        print("pwd is",pwd)
+
+        data = js.dumps(data)
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))
+        
 
     #add loading indicator
-    def hash_pwd(self,password):
+    def hash_password_func(self,password):
         password.encode("utf-8")
         self.__salt = bcrypt.gensalt(rounds=16)
         hashed_pwd = bcrypt.hashpw(password.encode("utf-8"),bytes(self.__salt))
+        self.__salt = str(self.__salt,encoding='utf-8')
 
         return hashed_pwd
 
         
-
-    def compare_pwd(self,__salt,__hashed_pwd,__password):
-            __allow_user_login = False
-            __password = bcrypt.hashpw(__password.encode("utf-8"),bytes(__salt))
-            
-            if(__hashed_pwd == __hashed_pwd):
-                print("password matches")
-                __allow_user_login = True
-
-            return __allow_user_login
 
     def create_key(self, target):
             #Generate and send P and G to other user

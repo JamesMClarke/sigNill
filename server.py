@@ -9,7 +9,7 @@ from time import sleep
 import socket, errno,threading, sys, logging, bcrypt, os
 
 
-reg_users_file = "data/reg_users.json"
+reg_users_file = "server-records/reg_users.json"
 branch = "dev"
 
 #TODO Handle ConnectionResetError and remove from connected users
@@ -17,6 +17,7 @@ branch = "dev"
 if(not os.path.isdir('logs')):
     os.mkdir('logs')
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
+
 
 
 class Server:
@@ -108,6 +109,17 @@ class Server:
                         elif('nonce' in data):
                             if("message" in data):
                                 self.forward(data['message'],data['nonce'],data['sender'])
+                            
+                            #recives password registeration
+                        if((("nonce" in data) and ("r_pwd" in data) and ("r_salt" in data))):
+                            client_name = data["sender"]
+                            password = self.decrypt(data["r_pwd"], data["sender"], data['nonce'])
+                            salt = self.decrypt(data["r_salt"], data["sender"], data['nonce2'])
+                            print("password",password,"salt",salt)
+                            self.check_user(client_name,salt,password,reg_users_file)
+
+                            
+                             
                         
                         #Handels received receipts
                         #TODO Implement handleing received receipts for server
@@ -197,37 +209,33 @@ class Server:
 
     #TODO if user is already in reg_user send reply saying that username is already taken
     #checks if user is in reg_user.json   
-    def check_user(self,username,salt,hashed_pwd,file):
+    def check_user(self,username,salt,password,file):
         try: 
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data["registered_users"]
-                salt = self.key.decrypt(salt)
-                pwd = self.decrypt(hashed_pwd)
-                print("decyrted pwd and salt:",pwd,":",salt)
-                #if reg_users.json is empty add user
                 if (len(data) == 0):
-                    self.save_user_to_server_config(username,salt,reg_users_file)
-
+                    print("record emptpy:  Adding user")
+                    self.save_user_to_server_config(username,salt,password,reg_users_file)
+                
                 for i in data:
                     print(len(data))
-                    #if the username not equal username is reg_user.json adds users
-                    if (username  != i["username"]):
-                        #self.save_user_to_server_config(username,salt,reg_users_file)
+                    #if the username not equal username or data length is 0 adds users
+                    if(username  != i["username"]):
                         print("User not registered\n Adding users")
+                        self.save_user_to_server_config(username,salt,password,reg_users_file)
 
                     elif (username ==  i["username"]):
                         self.c
                         print("User already registered")
-                        #def check user_pwd                    
         
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
 
 
-    def save_user_to_server_config(self,__username,__salt,file):
-        js_obj = {"username":str(__username),"salt":__salt }
+    def save_user_to_server_config(self,username,salt,password,file):
+        js_obj = {"username":str(username),"salt":salt,"password":password}
         try:
             with open(file,"r+") as file:
                 data = js.load(file)
