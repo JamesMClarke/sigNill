@@ -94,7 +94,7 @@ class Server:
                                 'target':data['sender'],
                                 'time_sent':str(datetime.now().strftime("%H:%m")),
                                 'sender':"server",
-                                'key': key.generate_public_key().decode('utf-8')
+                                'key': key.generate_public_key()
                                 }
                             data = js.dumps(data)
                             c.send(bytes(data,encoding='utf-8'))

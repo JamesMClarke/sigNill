@@ -34,6 +34,7 @@ class Client:
     server_key = Key('server')
 
     def __init__(self):
+        
         #initializes connection variables
         self.tcp_port = 8080
         self.tcp_ip = '127.0.0.1'
@@ -50,25 +51,11 @@ class Client:
         #TODO Check if user is already on the server, if not get them to create a password
         #TODO If user is on server get salt, hash password+salt, and send this back
         #TODO Once a user logs in store a token rather than their hashed password
-        self.send_user()
-        
+        sleep(1)
+        #Sends hashed user password and salt to the server
+        #TODO Only send this when creating a user
+        self.send("server", "r_pwd",self.hashed_password, True, "r_salt",self.__salt)
         self.menu()
-       
-    #sends username to server to be added to server users list
-    def send_user_data(self):
-        #Sends message to the server to say it has connected
-        data = {
-            'target':"server",
-            'status':"connected",
-            'sender':self.__username
-        }
-        data = js.dumps(data)
-        self.tcp_sock.send(bytes(data,encoding='utf-8'))
-
-        #Creates a key for the server
-        self.create_key("server")
-        #Wait for server to send public key back?
-
 
     #handles data sent from the server
     def handler(self):
@@ -164,24 +151,16 @@ class Client:
                 time_sent =datetime.now().strftime("%H:%m")
                 key = self.keys.find_key_by_name(target)
                 try:
-                    message, nonce = key.encrypt(mesg)
-                    data = {
-                        'target':target,
-                        'message':message.decode('utf-8'),
-                        'nonce':nonce.decode('utf-8'),
-                        'time_sent':str(time_sent),
-                        'sender':self.__username
-                        }
-                    data = js.dumps(data)
-                    self.send_to_server(data)
+                    #Sends encrypted message
+                    self.send(target, "message", mesg, True)
                 except:
                     print("Shared key has not been created yet")
                     print("Please try again a few seconds")
-                    self.send_p_g(key, target)
-                    #Gen public key
+                    #Sends p and g
+                    self.send(target,"p",key.get_P(),False,"g",key.get_G())
                     sleep(1)
                     #Send public key
-                    self.send_public_key(key.get_public(),target)
+                    self.send(target, 'key', key.get_public())
 
         self.menu()
 
@@ -189,15 +168,16 @@ class Client:
     def connect_to_server(self):
         try:
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
-            self.send_user_data()
-            print("connected to server")
 
         except socket.error as error:
             print("Using alt port")
             self.tcp_port = 10080
             self.tcp_sock.connect((self.tcp_ip,self.tcp_port))
-            self.send_user_data()
-            print("Connected to server")
+
+        self.send("server","status","connected")
+        print("Connected to server")
+        #Creates a key for the server
+        self.create_key("server")
     
     #user menu dislayed at start up
     def menu(self):
@@ -205,7 +185,7 @@ class Client:
             print("Commands:\n1: start chat\n2: edit username\n0: exit")
             cmd = reg_input("enter command: ", int)
             if(cmd =="1"):
-                #starts message input on seperate thread
+                #Starts messaging input on main thread
                 self.send_mesg()
             
             elif(cmd == "2"):
@@ -215,17 +195,8 @@ class Client:
                 pass
             elif(cmd =="0"):
                 try:
-                    time_sent =datetime.now().strftime("%H:%m")
-
-                    data = {
-                        'target':"server",
-                        'status':'disconnecting',
-                        'time_sent':str(time_sent),
-                        'sender':self.__username
-                        }
-
-                    data = js.dumps(data)
-                    self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                    #Sends disconnecting message to the server
+                    self.send("server","status","disconnecting")
                     self.shutdown_client()
 
                 except OSError:
@@ -363,30 +334,7 @@ class Client:
             }
 
         data = js.dumps(data)
-        self.tcp_sock.send(bytes(data,encoding='utf-8'))
-    
-
-    #user client login send encrypted salt and hashed_pwd for user reg
-    def send_user(self):
-        #Sleep so the shared key can be established before trying to encrypt
-        sleep(1)
-        pwd,nonce = self.server_key.encrypt(self.hashed_password)
-        print("\n",pwd)
-        salt,nonce2 = self.server_key.encrypt(self.__salt)
-
-        data = {
-            'target':'server',
-            'r_pwd':pwd.decode('utf-8'),
-            'nonce':nonce.decode('utf-8'),
-            'r_salt':salt.decode('utf-8'),
-            'nonce2':nonce2.decode('utf-8'),
-            'time_sent':str(datetime.now().strftime("%H:%m")),
-            'sender':self.__username
-            }
-
-        data = js.dumps(data)
-        self.tcp_sock.send(bytes(data,encoding='utf-8'))
-        
+        self.tcp_sock.send(bytes(data,encoding='utf-8'))    
 
     #add loading indicator
     def hash_password_func(self,password):
@@ -397,8 +345,6 @@ class Client:
 
         return hashed_pwd
 
-        
-
     def create_key(self, target):
             #Generate and send P and G to other user
             if(target != "server"):
@@ -408,45 +354,14 @@ class Client:
                 key = self.server_key
 
             sleep(1)
-            #Send p and g
-            self.send_p_g(key, target)
+            #Sends p and g
+            self.send(target,"p",key.get_P(),False,"g",key.get_G())
             #Gen public key
+            #Gen public key
+            pub = key.generate_public_key()
             sleep(1)
-            public_key = key.generate_public_key().decode('utf-8')
-            print(public_key)
             #Send public key
-            self.send_public_key(public_key,target)
-            
-
-    def send_p_g(self, key, target):
-        P, G = key.get_P_G()
-        #Send P and G
-        data = {
-                'target':target,
-                'time_sent':str(datetime.now().strftime("%H:%m")),
-                'sender':self.__username,
-                'p': str(P),
-                'g': str(G)
-                }
-        data = js.dumps(data)
-        if(target == "server"):
-            self.tcp_sock.send(bytes(data,encoding='utf-8'))
-        else:
-            self.send_to_server(data)
-
-    def send_public_key(self, public_key, target):
-        data = {
-                'target':target,
-                'time_sent':str(datetime.now().strftime("%H:%m")),
-                'sender':self.__username,
-                'key': public_key
-                }
-        data = js.dumps(data)
-        if(target == "server"):
-            self.tcp_sock.send(bytes(data,encoding='utf-8'))
-        else:
-            self.send_to_server(data)
-
+            self.send(target, 'key', pub)
 
     #Encrypts the whole message and sends it to sever within it's own message
     def send_to_server(self, data):
@@ -494,19 +409,51 @@ class Client:
             key = Key(data['sender'], int(data['p']), int(data['g']))
             self.keys.add_key(key)
             #Generate and send public key
-            public_key = key.generate_public_key().decode('utf-8')
-            self.send_public_key(public_key, data['sender'])
+            public_key = key.generate_public_key()
+            self.send(data['sender'], 'key', public_key)
 
     #Creates and sends a received receipt back to the sender
     def received_receipt(self, sender, type):
-        receipt = {
-            'target':sender,
-            'received':type,
+        self.send(sender,"received", type)
+
+    def send(self, target, type, data, encrypted = False, type2 = False, data2= False):
+        if(encrypted):
+            if(target != "server"):
+                key = self.keys.find_key_by_name(target)
+            else:
+                key = self.server_key
+            data, nonce = key.encrypt(data)
+            data = data.decode('utf-8')
+            nonce = nonce.decode('utf-8')
+            if(data2 != False):
+                #Encrypt data and data2
+                data2, nonce2 = key.encrypt(data2)
+                data2 = data2.decode('utf-8')
+                nonce2 = nonce2.decode('utf-8')
+        d = {
+            'target':target,
+            type : data,
             'time_sent':str(datetime.now().strftime("%H:%m")),
             'sender':self.__username
-            }
-        data = js.dumps(receipt)
-        self.send_to_server(data)
+        }
+        if(encrypted):
+            n = {'nonce':nonce}
+            d.update(n)
+        if(data2 != False):
+            two = {'type2': data2}
+            if(encrypted):
+                two = {type2: data2, 'nonce2':nonce2}
+            else:
+                two = {type2: data2}
+            d.update(two)
+        print(d)
+        d = js.dumps(d)
+        print("Send test")
+        print(d)
+        if(target == "server"):
+            self.tcp_sock.send(bytes(d,encoding='utf-8'))
+        else:
+            self.send_to_server(d)
 
     def shutdown_client(self):
             self.handler_loop = False

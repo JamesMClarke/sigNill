@@ -37,7 +37,7 @@ class Key:
         self._public = pow(self._G, self._private, self._P)
         bytes = self._public.to_bytes(32, 'big')
         public_to_send = base64.b64encode(bytes)
-        return public_to_send
+        return public_to_send.decode('utf-8')
 
     #Generates the shared private key
     def generate_shared(self, public2):
@@ -57,7 +57,7 @@ class Key:
         return self._shared
     
     def get_public(self):
-        return self._public
+        return self._public.decode('utf-8')
     
 
     #Encrypts the messages using AES and returns it in base 64
