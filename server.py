@@ -213,20 +213,25 @@ class Server:
             with open (file,"r") as read_file:
                 data = js.load(read_file)
                 data = data["registered_users"]
+                #if register_users is empty add user
                 if (len(data) == 0):
                     print("record emptpy:  Adding user")
                     self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
                 
-                for i in data:
-                    print(len(data))
-                    #if the username not equal username or data length is 0 adds users
-                    if(username  != i["username"]):
-                        print("User not registered: Adding users")
-                        self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
+                else:
+                    #checks if user already exists in registered users
+                    for i in data:
+                        print(len(data))
+                        #if the username not equal username or data length is 0 adds users
+                        if(username  != i["username"]):
+                            print("User not registered: Adding users")
+                            self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
 
-                    elif (username ==  i["username"]):
-                        print("User already registered")
-                        #send message to client that username is already taken
+                        elif (username ==  i["username"]):
+                            print("User already registered")
+                            #sends message to client that username is already 
+                            #data_to_send = js.dumps({"message":"username already taken"})
+                            #self.encrypt_and_send_message(data_to_send,username)
         
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))

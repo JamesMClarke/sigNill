@@ -1,14 +1,5 @@
 {
     "registered_users": [
-        {
-            "username": "bob",
-            "salt": "$2b$16$Acx.ev.zNmP0xYTzf87JZe",
-            "password": "$2b$16$Acx.ev.zNmP0xYTzf87JZeEZX.A5.lh.SPVVbb/u3zmlSUCdF3Y3O"
-        },
-        {
-            "username": "jeff",
-            "salt": "$2b$16$Cb/8cvbqh/CNPju.qrQDZe",
-            "password": "$2b$16$Cb/8cvbqh/CNPju.qrQDZeOHnxP6sFfh6ktBR3ZPvR5C2nDulrUz."
-        }
+       
     ]
 }

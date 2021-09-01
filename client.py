@@ -125,12 +125,12 @@ class Client:
                         print(str(data['sender'])+" received your message")
                     if(data['sender'] == "server" and data['status'] == 'kicked'):
                         print("You have been kicked")
-                        self.handler_loop = False
-                        self.tcp_sock.shutdown(0)
-                        self.tcp_sock.close()
-                        self.mesg_loop = False
-                        sys.exit("Client closing")
-                        quit()
+                        self.shutdown_client()
+
+                    if(data['sender']=="server" and data['status']=="User bob already connected"):
+                        print ('user already connected shutting down')
+                        self.shutdown_client()
+
                     else:
                         print(data['status'])
                 
@@ -225,9 +225,8 @@ class Client:
 
                     data = js.dumps(data)
                     self.tcp_sock.send(bytes(data,encoding='utf-8'))
+                    self.shutdown_client()
 
-                    self.tcp_sock.shutdown(0)
-                    self.tcp_sock.close()
                 except OSError:
                     pass
                 sys.exit("Client closing")
@@ -509,6 +508,13 @@ class Client:
             }
         data = js.dumps(receipt)
         self.send_to_server(data)
+
+    def shutdown_client(self):
+            self.handler_loop = False
+            self.tcp_sock.shutdown(0)
+            self.tcp_sock.close()
+            self.mesg_loop = False
+            sys.exit("Client closing")
 
            
 if __name__ == "__main__":
