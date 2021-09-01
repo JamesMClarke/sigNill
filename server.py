@@ -222,7 +222,6 @@ class Server:
                     #checks if user already exists in registered users
                     for i in data:
                         print(len(data))
-                        #if the username not equal username or data length is 0 adds users
                         if((username ==  i["username"]) or (self.salt ==i["salt"])):
                             print("User already registered")
 
