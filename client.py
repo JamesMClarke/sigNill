@@ -7,13 +7,12 @@ from tools import reg_input
 from keys import Keys
 from key import Key
 from os.path import exists
-import itertools, sys, socket, threading, bcrypt, getpass, os
+import sys, socket, threading, bcrypt, os
 
 #TODO Store shared key after it has been generated maybe
 #TODO Add text colour from config json
 #TODO Add choose text colour 
-#TODO Add store freinds to config.json
-#TODO FIX BUG: sender of message cannot see reply
+#TODO Add store friends to config.json
 
 #Add check that data/message has been received and if not resolve
 #TODO PART 1: Add received messages to everything
@@ -251,16 +250,14 @@ class Client:
                 valid = True
                 self.create_password()
 
-    #TODO Add reg expression using reg_input for a password
     def create_password(self):
-
         password_match = False
         while password_match == False:
-            __password = getpass.getpass("enter password:   ")
-            __password2 = getpass.getpass("renter password: ")
+            password = reg_input("Enter password:   ", "pwd")
+            password1 = reg_input("Renter password:   ", "pwd")
 
             #reruns create user if passwords do not match
-            if(__password != __password2):
+            if(password != password1):
                 print("passwords do not match")
             else:
                 password_match = True
@@ -270,12 +267,12 @@ class Client:
         self.loading_str = "hashing password: "
         self.complete = False
         loading.start()
-        self.hashed_password = (str(self.hash_password_func(__password),encoding='utf-8'))
+        self.hashed_password = (str(self.hash_password_func(password),encoding='utf-8'))
         self.complete = True
         loading.join()
 
 
-        #dosent save to config if dev
+        #Doesn't save to config if dev
         if(branch != "dev"):
             self.save_to_config(config_file)
         else:
@@ -306,7 +303,7 @@ class Client:
                 self.__username = i['username'] 
                 print("Welcome: ",self.__username) 
                 self.__salt = i['salt']
-                self.__password = getpass.getpass
+                self.__password = reg_input("Enter password:    ","pwd")
    
     # if no user in config saves username to config
     def save_to_config(self,file):
