@@ -9,7 +9,7 @@ from time import sleep
 import socket, errno,threading, sys, logging, bcrypt, os
 
 
-reg_users_file = "server-records/reg_users.json"
+reg_users_file = "server-records/server-users.json"
 branch = "dev"
 
 #TODO Handle ConnectionResetError and remove from connected users
@@ -224,13 +224,13 @@ class Server:
                     #checks if user already exists in registered users
                     for i in data:
                         print(len(data))
-                        #if the username not equal username or data length is 0 adds users
-                        if(username  != i["username"]):
+                        if((username ==  i["username"]) or (self.salt ==i["salt"])):
+                            print("User already registered")
+
+                        elif(((username != i["username"]) and (self.salt != i["salt"]) and (self.password !=i ['password']))):
+
                             print("User not registered: Adding users")
                             self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
-
-                        elif (username ==  i["username"]):
-                            print("User already registered")
                             #sends message to client that username is already 
                             #data_to_send = js.dumps({"message":"username already taken"})
                             #self.encrypt_and_send_message(data_to_send,username)
