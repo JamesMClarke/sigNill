@@ -14,6 +14,8 @@ branch = "dev"
 
 #TODO Handle ConnectionResetError and remove from connected users
 #TODO if client is registered send salt to client if not save client username and salt to reg_users
+#TODO Add check that data/message has been received and if not resolve
+
 if(not os.path.isdir('logs')):
     os.mkdir('logs')
 logging.basicConfig(filename="logs/"+str(datetime.now())+".log", level=logging.DEBUG)
@@ -290,7 +292,7 @@ class Server:
         return plaintext
 
     #Encrypts and sends a message
-    def encrypt_and_send_message(self, data, target):
+    def encrypt_and_send(self,type, data, target):
         key = self.keys.find_key_by_name(target)
         if(key == None):
             return False
@@ -298,24 +300,7 @@ class Server:
         ciphertext, nonce = key.encrypt(data)
         data = {
             'target':target,
-            'message':ciphertext.decode('utf-8'),
-            'nonce':nonce.decode('utf-8'),
-            'time_sent':str(datetime.now().strftime("%H:%m")),
-            'sender':"server"
-            }
-        data = js.dumps(data)
-        conn = self.users.find_conn_by_name(target)
-        conn.send(bytes(data,encoding='utf-8'))
-        return True
-    
-    def encrypt_and_send_status(self, status, target):
-        key = self.keys.find_key_by_name(target)
-        if(key == None):
-            return False
-        ciphertext, nonce = key.encrypt(status)
-        data = {
-            'target':target,
-            'status':ciphertext.decode('utf-8'),
+            type:ciphertext.decode('utf-8'),
             'nonce':nonce.decode('utf-8'),
             'time_sent':str(datetime.now().strftime("%H:%m")),
             'sender':"server"
@@ -334,14 +319,14 @@ class Server:
         data = js.dumps(data)
         if(target != "server"):
             #Checks user is still connected
-            if(not self.encrypt_and_send_message(data,target)):
+            if(not self.encrypt_and_send("message",data,target)):
                 #If they aren't then send a status message back
                 status = "User "+target+" is not currently connected"
-                self.encrypt_and_send_status(status, sender)
-
-
-
-            
+                self.encrypt_and_send("status",status, sender)
+    
+    #Creates and sends a received receipt back to the sender
+    def received_receipt(self, sender, type):
+        self.encrypt_and_send("received",type,sender)
         
 server = Server()
 

@@ -22,3 +22,14 @@ def reg_input(text,type):
             if(type == "pwd"):
                 print("A password must be at least 8 chars and contain at least 1 number, 1 Capital and 1 special char")
     return i
+
+    #Creates and sends a received receipt back to the sender
+    def received_receipt(self, sender, type):
+        receipt = {
+            'target':sender,
+            'received':type,
+            'time_sent':str(datetime.now().strftime("%H:%m")),
+            'sender':self.__username
+            }
+        data = js.dumps(receipt)
+        self.send_to_server(data)

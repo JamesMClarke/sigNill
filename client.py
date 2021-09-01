@@ -14,8 +14,7 @@ import sys, socket, threading, bcrypt, os
 #TODO Add choose text colour 
 #TODO Add store friends to config.json
 
-#Add check that data/message has been received and if not resolve
-#TODO PART 1: Add received messages to everything
+#TODOAdd received messages to everything
 #TODO PART 2: Check that they have been received
 #TODO PART 3: If they haven't been received resolve
 
@@ -80,7 +79,7 @@ class Client:
             if(len(data) > 0):
                 print(data)
                 data = js.loads(data.decode('utf-8'))
-
+                sender = data["sender"]
                 #If message sent from sender print
                 if ('message' in data):
                     sender = data["sender"]
@@ -101,10 +100,12 @@ class Client:
                             #If P and G are in the message
                             elif ('p' in data):
                                 self.gen_public_from_p_g(data)
+                                self.received_receipt(sender,"pandg")
 
                             #If the keys in the message
                             elif('key' in data):
                                 self.gen_shared(data)
+                                self.received_receipt(sender,"key")
                             
                             #Handels received receipts
                             elif('received' in data):
@@ -113,11 +114,12 @@ class Client:
                 #Handels gening public for server
                 elif ('p' in data):
                     self.gen_public_from_p_g(data)
+                    self.received_receipt(sender,"pandg")
                 
                 #Handles gening shared key for the server
                 elif('key' in data):
                     self.gen_shared(data)
-                    
+                    self.received_receipt(sender,"key")
                     
                 elif ('status' in data):
                     if(data['status'] == "Message received"):

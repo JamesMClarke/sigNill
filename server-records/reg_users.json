@@ -39,6 +39,36 @@
             "username": "Bob",
             "salt": "$2b$16$L/CQFV6bJFnIOnipU1GJp.",
             "password": "$2b$16$L/CQFV6bJFnIOnipU1GJp.OzhrUJklyo8B5.TNJglpfFeDLv0UQCa"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$9oR0TMXFTsPOk14gX.eg2u",
+            "password": "$2b$16$9oR0TMXFTsPOk14gX.eg2uo5Gw7.B23Z6Lw4zIdB1tE.79AbtsFwe"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$9oR0TMXFTsPOk14gX.eg2u",
+            "password": "$2b$16$9oR0TMXFTsPOk14gX.eg2uo5Gw7.B23Z6Lw4zIdB1tE.79AbtsFwe"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$9oR0TMXFTsPOk14gX.eg2u",
+            "password": "$2b$16$9oR0TMXFTsPOk14gX.eg2uo5Gw7.B23Z6Lw4zIdB1tE.79AbtsFwe"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO",
+            "password": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO44J/01oIipnEy.rSYW4s8w8bAt.DUvi"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO",
+            "password": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO44J/01oIipnEy.rSYW4s8w8bAt.DUvi"
+        },
+        {
+            "username": "Bob",
+            "salt": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO",
+            "password": "$2b$16$OQOadJ/cRurQ8Mts7vlyoO44J/01oIipnEy.rSYW4s8w8bAt.DUvi"
         }
     ]
 }
