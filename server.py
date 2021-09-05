@@ -222,22 +222,14 @@ class Server:
                             print("User already registered")
                             #sends reponse to the client if there username,pwd,salt is already in use
                             #TODO put in own function
-                            conn = self.users.find_conn_by_name(username)
-                            data = {
-                                    'target':username,
-                                    'status':"Username "+username+" is already registered",
-                                    'time_sent':str(datetime.now().strftime("%H:%m")),
-                                    'sender':"server"
-                                    }
-                            data = js.dumps(data)
-                            print(data)
-                            conn.send(bytes(data,encoding='utf-8'))
-                            handlerloop = False
+                            self.check_user_response(username,"is existing user")
+                          
 
                         elif(((username != i["username"]) and (self.salt != i["salt"]) and (self.password !=i ['password']))):
                             print("User not registered: Adding users")
                             self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
-                            #sends message to client that username is already in use 
+                            self.check_user_response(username," Registering New user")
+
                                                
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
@@ -311,6 +303,22 @@ class Server:
         conn = self.users.find_conn_by_name(target)
         conn.send(bytes(data,encoding='utf-8'))
         return True
+
+    def check_user_response(self,username,mesg):
+
+
+        conn = self.users.find_conn_by_name(username)
+        data = {
+                'target':username,
+                'status':"Username "+username+": "+mesg,
+                'time_sent':str(datetime.now().strftime("%H:%m")),
+                'sender':"server"
+                }
+        data = js.dumps(data)
+        print(data)
+        conn.send(bytes(data,encoding='utf-8'))
+        handlerloop = False
+        
 
     #Forwards on an encrypted message to the appropriate user
     def forward(self, message, nonce, sender):
