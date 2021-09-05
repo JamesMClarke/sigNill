@@ -336,6 +336,7 @@ class Client:
         data = js.dumps(data)
         self.tcp_sock.send(bytes(data,encoding='utf-8'))    
 
+
     #add loading indicator
     def hash_password_func(self,password):
         password.encode("utf-8")
@@ -460,7 +461,9 @@ class Client:
             self.tcp_sock.shutdown(0)
             self.tcp_sock.close()
             self.mesg_loop = False
+            self.handler_thread.join()
             sys.exit("Client closing")
+            
 
            
 if __name__ == "__main__":

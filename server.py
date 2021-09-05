@@ -60,11 +60,7 @@ class Server:
                             if(data['status'] == "connected"):
                                 username = data["sender"] 
                                 if(not self.users.find_conn_by_name(username)):
-                                    #salt =  data["data"]
-                                    #hashed_pwd = data["data_2"]
-                                    #print("salt and hash pwd",salt,hashed_pwd)
                                     #checks if user already added if they are runs pwd comapre if not adds
-                                    #self.check_user(username,salt,hashed_pwd,reg_users_file)                       
                                     self.users.add_user(username, c)
                                     print("User '%s' connected at %s"%(username, datetime.now().strftime("%H:%m")))
                                     logging.debug("User '%s', '%s' , '%s' connected at %s"%(username,str(a[0]),str(a[1]), datetime.now().strftime("%H:%m")))
@@ -99,9 +95,9 @@ class Server:
                             data = js.dumps(data)
                             c.send(bytes(data,encoding='utf-8'))
 
-                        #If the data includes their public key generate shaired key
+                        #If the data includes their public key generate shared key
                         elif('key' in data):
-                            #Generate shaired key
+                            #Generate shared key
                             key = self.keys.find_key_by_name(data['sender'])
                             if(not key.shared_set()):
                                 key.generate_shared(data['key'])
@@ -112,18 +108,15 @@ class Server:
                             if("message" in data):
                                 self.forward(data['message'],data['nonce'],data['sender'])
                             
-                            #recives password registeration
+                        #recieves password registeration
                         if((("nonce" in data) and ("r_pwd" in data) and ("r_salt" in data))):
                             client_name = data["sender"]
-                            self.password = self.decrypt(data["r_pwd"], data["sender"], data['nonce'])
-                            self.salt = self.decrypt(data["r_salt"], data["sender"], data['nonce2'])
+                            self.password = self.decrypt(data["r_pwd"],client_name, data['nonce'])
+                            self.salt = self.decrypt(data["r_salt"],client_name, data['nonce2'])
                             self.check_user(client_name,reg_users_file)
 
-                            
-                             
-                        
-                        #Handels received receipts
-                        #TODO Implement handleing received receipts for server
+                        #Handles received receipts
+                        #TODO Implement handling received receipts for server
                         elif('received' in data):
                             print("The %s was received"%(data['received']))
 
@@ -224,17 +217,29 @@ class Server:
                     #checks if user already exists in registered users
                     for i in data:
                         print(len(data))
-                        if((username ==  i["username"]) or (self.salt ==i["salt"])):
+
+                        if(((username ==  i["username"]) or (self.salt ==i["salt"]) or (self.password == i['password']) )):
                             print("User already registered")
+                            
+                            #put in own function
+                            conn = self.users.find_conn_by_name(username)
+                            data = {
+                                    'target':username,
+                                    'status':"Username "+username+" is already registered",
+                                    'time_sent':str(datetime.now().strftime("%H:%m")),
+                                    'sender':"server"
+                                    }
+                            data = js.dumps(data)
+                            print(data)
+                            conn.send(bytes(data,encoding='utf-8'))
+                            handlerloop = False
 
                         elif(((username != i["username"]) and (self.salt != i["salt"]) and (self.password !=i ['password']))):
-
                             print("User not registered: Adding users")
                             self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
-                            #sends message to client that username is already 
-                            #data_to_send = js.dumps({"message":"username already taken"})
-                            #self.encrypt_and_send_message(data_to_send,username)
-        
+                            #sends message to client that username is already in use 
+                            
+                           
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
@@ -255,12 +260,10 @@ class Server:
    
     #initializes server
     def run(self):
-
         #assigns server TCP ip, Port and receiving data buffer size
         tcp_ip = '127.0.0.1'
         tcp_port = 8080
         self.buf_size = 2048
-        
         #binds tcp socket and listens on it
         #if port in use, alt port num is used
         try :
