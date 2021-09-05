@@ -15,6 +15,7 @@ branch = "dev"
 #TODO Handle ConnectionResetError and remove from connected users
 #TODO if client is registered send salt to client if not save client username and salt to reg_users
 #TODO Add check that data/message has been received and if not resolve
+#TODO BUG in decoding password unexpected char at index 0, for connecting client if they're already registered unknown trigger -SC
 
 if(not os.path.isdir('logs')):
     os.mkdir('logs')
@@ -212,7 +213,6 @@ class Server:
                 if (len(data) == 0):
                     print("record emptpy:  Adding user")
                     self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
-                
                 else:
                     #checks if user already exists in registered users
                     for i in data:
@@ -220,8 +220,8 @@ class Server:
 
                         if(((username ==  i["username"]) or (self.salt ==i["salt"]) or (self.password == i['password']) )):
                             print("User already registered")
-                            
-                            #put in own function
+                            #sends reponse to the client if there username,pwd,salt is already in use
+                            #TODO put in own function
                             conn = self.users.find_conn_by_name(username)
                             data = {
                                     'target':username,
@@ -238,8 +238,7 @@ class Server:
                             print("User not registered: Adding users")
                             self.save_user_to_server_config(username,self.salt,self.password,reg_users_file)
                             #sends message to client that username is already in use 
-                            
-                           
+                                               
         except FileNotFoundError: 
             print("error no reg_user.json file found: "+str(FileNotFoundError))
         
